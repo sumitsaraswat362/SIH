@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read-only access to all documents (needed for onSnapshot real-time sync)
+    // Completely deny all direct client-side writes.
+    // All database updates must go through server-side Admin SDK endpoints to ensure authorization and security.
+    match /{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

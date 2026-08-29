@@ -1,0 +1,975 @@
+@import "leaflet/dist/leaflet.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-mono), "SF Mono", ui-monospace, monospace;
+}
+
+/* ============================================================
+   ANNAPURNA — Apple HIG Light Mode Design System
+   ============================================================ */
+
+:root {
+  /* iOS System Colors */
+  --bg-primary: #F0F4F8;          /* Vibrant cool off-white with slight blue tint */
+  --bg-secondary: rgba(255, 255, 255, 0.6); /* Frosted glass */
+  --bg-tertiary: #E8EEF2;         
+  --bg-elevated: rgba(255, 255, 255, 0.9);
+
+  --text-primary: #1D1D1F;        /* Rich black */
+  --text-secondary: #4B4B52;
+  --text-tertiary: #86868B;
+  --text-quaternary: #C7C7CC;
+
+  --separator: #D1D1D6;
+  --separator-opaque: rgba(60, 60, 67, 0.08);
+  --fill-primary: rgba(120, 120, 128, 0.12);
+  --fill-secondary: rgba(120, 120, 128, 0.08);
+  --fill-tertiary: rgba(118, 118, 128, 0.04);
+
+  /* iOS Tint Colors */
+  --tint-blue: #007AFF;
+  --tint-green: #34C759;
+  --tint-red: #FF3B30;
+  --tint-orange: #FF9500;
+  --tint-yellow: #FFD60A;
+  --tint-purple: #AF52DE;
+  --tint-indigo: #5856D6;
+  --tint-teal: #5AC8FA;
+
+  /* Shadows (Apple-style subtle elevation) */
+  --shadow-card: 0 4px 24px -6px rgba(0, 122, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  --shadow-elevated: 0 10px 30px -4px rgba(0, 122, 255, 0.08), 0 4px 10px rgba(0,0,0,0.04);
+  --shadow-drawer: 4px 0 24px rgba(0,0,0,0.15);
+
+  /* Spacing (8pt grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+.dark {
+  /* iOS System Colors Dark Mode */
+  --bg-primary: #000000;
+  --bg-secondary: #1C1C1E;
+  --bg-tertiary: #2C2C2E;
+  --bg-elevated: #2C2C2E;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(235, 235, 245, 0.8);
+  --text-tertiary: rgba(235, 235, 245, 0.6);
+  --text-quaternary: rgba(235, 235, 245, 0.3);
+
+  --separator: #38383A;
+  --separator-opaque: rgba(84, 84, 88, 0.65);
+  --fill-primary: rgba(120, 120, 128, 0.36);
+  --fill-secondary: rgba(120, 120, 128, 0.32);
+  --fill-tertiary: rgba(118, 118, 128, 0.24);
+  
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(90, 200, 250, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(175, 82, 222, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(52, 199, 89, 0.1) 0%, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+}
+
+html.dark body {
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(0, 122, 255, 0.12) 0px, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(52, 199, 89, 0.12) 0px, transparent 50%);
+}
+
+/* iOS Large Title style */
+.ios-large-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+/* iOS Title styles */
+.ios-title1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.36px;
+  line-height: 1.2;
+}
+.ios-title2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  line-height: 1.3;
+}
+.ios-title3 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.38px;
+  line-height: 1.3;
+}
+.ios-headline {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.41px;
+  line-height: 1.3;
+}
+.ios-body {
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.41px;
+  line-height: 1.47;
+}
+.ios-callout {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.32px;
+}
+.ios-subheadline {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.24px;
+}
+.ios-footnote {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -0.08px;
+  color: var(--text-tertiary);
+}
+.ios-caption {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-tertiary);
+}
+
+/* ============================================================
+   CARD STYLES (Grouped Inset & Premium Glass)
+   ============================================================ */
+.ios-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  /* overflow: hidden removed — use ios-card-clip when needed */
+}
+/* Use this class on cards that NEED overflow:hidden (e.g. map containers, image containers) */
+.ios-card-clip {
+  overflow: hidden;
+}
+
+.dark .ios-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.glass-panel {
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+.ios-card-inset {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  margin-inline: var(--space-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* Row inside a card (like Settings app rows) */
+.ios-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px var(--space-md);
+  min-height: 44px;
+  background: var(--bg-secondary);
+  transition: background 0.15s ease;
+}
+.ios-row:active {
+  background: var(--fill-tertiary);
+}
+.ios-row + .ios-row {
+  border-top: 0.5px solid var(--separator-opaque);
+  margin-left: var(--space-md);
+}
+
+/* ============================================================
+   GLOBAL INTERACTIVITY (Tactile Micro-Animations)
+   ============================================================ */
+button, .ios-card, .tactile-item {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+button:active:not(:disabled), .ios-card:active, .tactile-item:active {
+  transform: scale(0.97);
+}
+
+/* ============================================================
+   BUTTON UPGRADES (Apple HIG Capsule & Frosted Glass)
+   ============================================================ */
+.btn-primary-ios {
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--tint-blue) 0%, #0062CC 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 122, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary-ios:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+.btn-primary-ios:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary-ios {
+  border-radius: 9999px;
+  background: var(--fill-tertiary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--separator-opaque);
+  cursor: pointer;
+}
+
+/* ============================================================
+   NAVIGATION BAR (Top)
+   ============================================================ */
+.ios-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bg-secondary);
+  opacity: 0.85;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 0.5px solid var(--separator-opaque);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+
+/* ============================================================
+   BOTTOM TAB BAR
+   ============================================================ */
+.ios-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bg-secondary);
+  opacity: 0.90;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 0.5px solid var(--separator-opaque);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding: 6px 0 max(env(safe-area-inset-bottom), 8px) 0;
+}
+
+@media (min-width: 768px) {
+  .ios-tabbar {
+    display: none !important;
+  }
+}
+.ios-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  min-width: 56px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  transition: color 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-tab.active {
+  color: var(--tint-blue);
+}
+.ios-tab svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================================
+   DRAWER / BOTTOM SHEET OVERLAYS
+   ============================================================ */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 14px var(--space-lg);
+  min-height: 52px;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.drawer-nav-item:active {
+  background: var(--fill-tertiary);
+}
+.drawer-nav-item.active {
+  color: var(--tint-blue);
+  font-weight: 600;
+  background: rgba(0, 122, 255, 0.08);
+  border-radius: var(--radius-sm);
+  margin-inline: var(--space-sm);
+  padding-inline: calc(var(--space-lg) - var(--space-sm));
+}
+.drawer-nav-item svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   BADGES (iOS style)
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.badge-safe {
+  background: rgba(52, 199, 89, 0.12);
+  color: #248A3D;
+}
+.badge-warning {
+  background: rgba(255, 149, 0, 0.12);
+  color: #C93400;
+}
+.badge-danger {
+  background: rgba(255, 59, 48, 0.12);
+  color: #D70015;
+}
+.badge-info {
+  background: rgba(0, 122, 255, 0.1);
+  color: #0040DD;
+}
+.badge-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--tint-red);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   BUTTONS (Apple HIG)
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 24px;
+  border-radius: 9999px; /* Capsule shape */
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  min-height: 44px;
+  transition: filter 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(0.9);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--tint-blue) 0%, #0062CC 100%);
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+.btn-success {
+  background: linear-gradient(180deg, var(--tint-green) 0%, #28A745 100%);
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(52, 199, 89, 0.3);
+}
+.btn-warning {
+  background: linear-gradient(180deg, var(--tint-orange) 0%, #E08A00 100%);
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(255, 149, 0, 0.3);
+}
+.btn-danger {
+  background: linear-gradient(180deg, var(--tint-red) 0%, #D32F2F 100%);
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(255, 59, 48, 0.3);
+}
+.btn-ghost {
+  background: var(--fill-tertiary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  border: 1px solid var(--separator-opaque);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn-tinted {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--tint-blue);
+}
+
+/* Small button variant */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 15px;
+  min-height: 36px;
+  border-radius: 9999px;
+}
+
+/* ============================================================
+   SEGMENT CONTROL (iOS style tabs)
+   ============================================================ */
+.ios-segment {
+  display: flex;
+  background: var(--fill-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 0;
+}
+.ios-segment-item {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-segment-item.active {
+  background: var(--bg-secondary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+}
+.ios-segment-item.ios-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
+}
+
+.dark .ios-card {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================
+   NEW UI TRENDS (Glass, Clay, Skeuomorphic, Aura)
+   ============================================================ */
+
+/* Aura Effects (Glowing orbs) */
+@keyframes aura-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.aura-container {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.aura-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  animation: aura-spin 15s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+.aura-blue { background: radial-gradient(circle, rgba(0,122,255,0.8) 0%, rgba(0,122,255,0) 70%); }
+.aura-red { background: radial-gradient(circle, rgba(255,59,48,0.8) 0%, rgba(255,59,48,0) 70%); }
+.aura-green { background: radial-gradient(circle, rgba(52,199,89,0.8) 0%, rgba(52,199,89,0) 70%); }
+.aura-purple { background: radial-gradient(circle, rgba(175,82,222,0.8) 0%, rgba(175,82,222,0) 70%); }
+.dark .aura-orb { opacity: 0.3; filter: blur(80px); }
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+}
+.dark .glass {
+  background: rgba(28, 28, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Liquid Glass (Glossy headers) */
+.liquid-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+  backdrop-filter: blur(50px) saturate(250%);
+  -webkit-backdrop-filter: blur(50px) saturate(250%);
+  border-top: 1px solid rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+.dark .liquid-glass {
+  background: linear-gradient(135deg, rgba(50, 50, 55, 0.6), rgba(25, 25, 30, 0.4));
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Claymorphism (Puffy soft 3D) */
+.clay {
+  background: #f0f4f8;
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    10px 10px 20px #c8d0e7, 
+    -10px -10px 20px #ffffff,
+    inset -5px -5px 10px rgba(255,255,255,0.6),
+    inset 5px 5px 10px rgba(200, 208, 231, 0.4);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.clay:hover {
+  transform: translateY(-2px);
+}
+.dark .clay {
+  background: #232325;
+  box-shadow: 
+    10px 10px 20px #111111, 
+    -10px -10px 20px #353535,
+    inset -5px -5px 10px rgba(0,0,0,0.6),
+    inset 5px 5px 10px rgba(50,50,55,0.4);
+}
+
+/* Skeuomorphic 3D Button */
+.skeuomorphic-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #e0e5ec 100%);
+  border: 1px solid #d1d9e6;
+  border-radius: var(--radius-full);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 3px 0 #b0bac9; /* 3D press effect via shadow, not border */
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.skeuomorphic-btn:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 2px 4px rgba(0,0,0,0.1),
+    0 1px 0 #b0bac9;
+}
+.dark .skeuomorphic-btn {
+  background: linear-gradient(180deg, #3a3a3c 0%, #2c2c2e 100%);
+  border-color: #4a4a4c;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 0 #1c1c1e;
+}
+
+.skeuomorphic-primary {
+  background: linear-gradient(180deg, #34C759 0%, #28a745 100%);
+  border-color: #28a745;
+  color: white;
+  box-shadow: 
+    0 4px 10px rgba(52, 199, 89, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 3px 0 #1e7e34;
+}
+.skeuomorphic-primary:active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 0 #1e7e34;
+}
+.skeuomorphic-danger {
+  background: linear-gradient(180deg, #FF3B30 0%, #d32f2f 100%);
+  border-color: #d32f2f;
+  color: white;
+  box-shadow: 
+    0 4px 10px rgba(255, 59, 48, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 3px 0 #b71c1c;
+}
+.skeuomorphic-danger:active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 0 #b71c1c;
+}
+
+/* ============================================================
+   KPI CARDS
+   ============================================================ */
+.kpi-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+}
+.kpi-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+/* ============================================================
+   FORM INPUTS (iOS style)
+   ============================================================ */
+.ios-input {
+  width: 100%;
+  padding: 12px var(--space-md);
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-sm);
+  font-size: 17px;
+  color: var(--text-primary);
+  outline: none;
+  min-height: 44px;
+  transition: border-color 0.2s ease;
+}
+.ios-input:focus {
+  border-color: var(--tint-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+}
+.ios-input::placeholder {
+  color: var(--text-quaternary);
+}
+
+.ios-select {
+  width: 100%;
+  padding: 12px var(--space-md);
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-sm);
+  font-size: 17px;
+  color: var(--text-primary);
+  outline: none;
+  min-height: 44px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238E8E93' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.762L10.825 4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes pulse-dot {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-pulse-danger {
+  animation: pulse-danger 2s ease-in-out infinite;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Temperature Gauge SVG */
+.gauge-circle {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease;
+}
+
+/* ============================================================
+   SCROLLBAR (thin, Apple-like)
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+   TYPOGRAPHY PROSE OVERRIDES
+   ============================================================ */
+.prose {
+  --tw-prose-body: var(--text-primary);
+  --tw-prose-headings: var(--text-primary);
+  --tw-prose-links: var(--tint-blue);
+  --tw-prose-bold: var(--text-primary);
+  --tw-prose-counters: var(--text-tertiary);
+  --tw-prose-bullets: var(--text-tertiary);
+  --tw-prose-hr: var(--separator);
+  --tw-prose-quotes: var(--text-secondary);
+  --tw-prose-quote-borders: var(--separator);
+  --tw-prose-captions: var(--text-tertiary);
+  --tw-prose-code: var(--text-primary);
+  --tw-prose-pre-code: var(--text-primary);
+  --tw-prose-pre-bg: var(--bg-secondary);
+  --tw-prose-th-borders: var(--separator);
+  --tw-prose-td-borders: var(--separator);
+}
+
+/* ============================================================
+   RESPONSIVE — Mobile bottom padding for tab bar
+   ============================================================ */
+.has-tabbar {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 8px) + 16px);
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+html.dark {
+  --bg-primary: #000000;
+  --bg-secondary: #1C1C1E;
+  --bg-tertiary: #2C2C2E;
+  --bg-elevated: #1C1C1E;
+  --text-primary: #FFFFFF;
+  --text-secondary: #EBEBF5;
+  --text-tertiary: #8E8E93;
+  --text-quaternary: #636366;
+  --separator: #38383A;
+  --separator-opaque: rgba(84, 84, 88, 0.65);
+  --fill-primary: rgba(120, 120, 128, 0.36);
+  --fill-secondary: rgba(120, 120, 128, 0.32);
+  --fill-tertiary: rgba(118, 118, 128, 0.24);
+}
+
+html.dark body {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+html.dark .ios-card {
+  background: #1C1C1E;
+  box-shadow: none;
+  border: 0.5px solid rgba(84, 84, 88, 0.3);
+}
+
+html.dark .kpi-card {
+  background: #1C1C1E;
+  box-shadow: none;
+  border: 0.5px solid rgba(84, 84, 88, 0.3);
+}
+
+html.dark .ios-navbar {
+  background: rgba(0, 0, 0, 0.85);
+  border-bottom-color: rgba(84, 84, 88, 0.65);
+}
+
+html.dark .ios-tabbar {
+  background: rgba(28, 28, 30, 0.94);
+  border-top-color: rgba(84, 84, 88, 0.65);
+}
+
+html.dark .ios-tab {
+  color: #8E8E93;
+}
+html.dark .ios-tab.active {
+  color: #007AFF;
+}
+
+html.dark .drawer-panel {
+  background: #1C1C1E;
+}
+
+html.dark .drawer-nav-item {
+  color: #FFFFFF;
+}
+html.dark .drawer-nav-item.active {
+  background: rgba(0, 122, 255, 0.15);
+  color: #0A84FF;
+}
+
+html.dark .ios-segment {
+  background: rgba(118, 118, 128, 0.24);
+}
+html.dark .ios-segment-item.active {
+  background: #2C2C2E;
+}
+
+html.dark .ios-input {
+  background: #1C1C1E;
+  border-color: #38383A;
+  color: #FFFFFF;
+}
+html.dark .ios-input:focus {
+  border-color: #0A84FF;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+}
+
+html.dark .ios-select {
+  background: #1C1C1E;
+  border-color: #38383A;
+  color: #FFFFFF;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   DARK MODE — Tailwind hardcoded color overrides
+   These catch bg-[#F2F2F7], bg-white, text-[#000000], etc.
+   used in component files without needing to edit each one.
+   ============================================================ */
+html.dark .bg-\[\#F2F2F7\] {
+  background-color: #000000 !important;
+}
+html.dark .bg-white {
+  background-color: #1C1C1E !important;
+}
+html.dark .text-\[\#000000\] {
+  color: #FFFFFF !important;
+}
+html.dark .text-\[\#3C3C43\] {
+  color: #EBEBF5 !important;
+}
+html.dark .text-black {
+  color: #FFFFFF !important;
+}
+html.dark .border-\[\#E5E5EA\] {
+  border-color: #38383A !important;
+}
+html.dark .border-\[\#C6C6C8\]\/30 {
+  border-color: rgba(84, 84, 88, 0.5) !important;
+}
+html.dark .border-\[\#C6C6C8\]\/20 {
+  border-color: rgba(84, 84, 88, 0.4) !important;
+}
+html.dark .shadow-inner {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4) !important;
+}
+
+/* Badge overrides */
+html.dark .badge-safe {
+  background: rgba(52, 199, 89, 0.2);
+  color: #30D158;
+}
+html.dark .badge-warning {
+  background: rgba(255, 149, 0, 0.2);
+  color: #FF9F0A;
+}
+html.dark .badge-danger {
+  background: rgba(255, 59, 48, 0.2);
+  color: #FF453A;
+}
+html.dark .badge-info {
+  background: rgba(10, 132, 255, 0.15);
+  color: #0A84FF;
+}
