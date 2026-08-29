@@ -32,14 +32,14 @@ export function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
-          <Link href="/features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="/tracking" className="hover:text-white transition-colors">Tracking</Link>
-          <Link href="/bidding" className="hover:text-white transition-colors">Bidding</Link>
+          <Link href="/farmer" className="hover:text-white transition-colors">Farmer Portal</Link>
+          <Link href="/wholesaler" className="hover:text-white transition-colors">Buyer Portal</Link>
+          <Link href="/nerve-center" className="hover:text-white transition-colors">AI Matchmaking</Link>
         </div>
 
         <div className="flex items-center gap-3 text-sm font-medium">
-          <Link href="/login" className="px-5 py-2.5 rounded-full bg-gradient-to-b from-[#0A84FF] to-[#005DEB] shadow-[inset_0px_1px_1px_rgba(255,255,255,0.4)] hover:opacity-90 transition-opacity text-white">
-            Login / Use App
+          <Link href="/farmer" className="px-5 py-2.5 rounded-full bg-gradient-to-b from-[#34C759] to-[#28A745] shadow-[inset_0px_1px_1px_rgba(255,255,255,0.4)] hover:opacity-90 transition-opacity text-white">
+            List Produce
           </Link>
         </div>
       </motion.nav>
