@@ -12,12 +12,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `Analyze this image of food/cargo for quality control.
-Assess if there is any spoilage, rot, or damage.
+    const prompt = `Analyze this image of freshly harvested farm produce for quality control.
+Grade the harvest quality based on size consistency, color uniformity, pest damage, and ripeness level.
 Return a JSON object ONLY, with NO markdown formatting, with this exact structure:
 {
-  "spoilagePercentage": number (0-100),
-  "reasoning": string (brief explanation of what you see and why you gave that percentage)
+  "qualityScore": number (0-100),
+  "reasoning": string (brief explanation of the grade (A/B/C), what you see, and a recommended price bracket)
 }`;
 
     let base64Data = "";
@@ -59,8 +59,8 @@ Return a JSON object ONLY, with NO markdown formatting, with this exact structur
     } catch (e) {
       console.warn("Gemini API failed, using fallback vision analysis:", e);
       parsedResult = {
-        spoilagePercentage: 65,
-        reasoning: "Extensive mold growth and softening detected on the surface. Unsafe for consumption."
+        qualityScore: 85,
+        reasoning: "Grade A: Excellent color uniformity and size consistency. No pest damage. Recommended premium price bracket."
       };
     }
 

@@ -72,7 +72,7 @@ export function FloatingNav({ activeTab }: FloatingNavProps) {
     {/* Page Logo Fixed Top Left */}
     <div className="fixed top-6 left-6 md:top-8 md:left-8 z-40 hidden sm:flex items-center gap-2">
       <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#007AFF] to-[#34C759] flex items-center justify-center text-xs font-bold text-white shadow-sm">A</div>
-      <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Annapurna Logistics</span>
+      <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Annapurna Marketplace</span>
     </div>
     </>
   );

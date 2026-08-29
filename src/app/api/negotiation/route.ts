@@ -37,13 +37,15 @@ export async function POST(req: Request) {
     }
 
     const prompt = `You are the Marketplace AI negotiating on behalf of the farmer.
-Produce: ${cargoType}, Quantity: ${quantityKg} kg, Spoilage in: ${spoilageMinutes} mins.
-Asking Price: ${askingPricePerKg}/kg.
+Your goal is to maximize farmer profit by eliminating the 30% commission agent cut.
+Produce: fresh farm produce (${cargoType}), Quantity: ${quantityKg} kg.
+Asking Price: ${askingPricePerKg}/kg (Minimum acceptable price).
 Buyer Bid: ${bidPricePerKg}/kg for ${bidQuantityKg} kg.
 Current Round: ${roundNumber} (max 3).
 AI Action Decided: ${action}.
 ${counterPrice ? `Counter Price: ${counterPrice}/kg.` : ''}
 
+Compare the offer against the local mandi rate. Refuse any bid below the farmer's asking price. Emphasize the benefits of direct sale.
 Write a short, professional natural-language reasoning explaining this decision to the buyer.
 Return ONLY the string reasoning. Do not wrap in JSON.`;
 

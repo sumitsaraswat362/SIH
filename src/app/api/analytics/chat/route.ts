@@ -21,18 +21,23 @@ export async function POST(req: Request) {
       Generate a valid Standard SQL query to answer this question.
       
       CRITICAL SCHEMA INFORMATION:
-      - The exact table you must query is: \`${PROJECT_ID}.annapurna_telemetry.truck_telemetry\`
+      - The exact table you must query is: \`${PROJECT_ID}.annapurna_marketplace.transactions\`
       - Columns available: 
-        truck_id (STRING), truck_plate (STRING), driver_name (STRING), 
-        cargo_type (STRING), temperature_celsius (FLOAT64), humidity_percent (FLOAT64), 
-        ethylene_level (STRING), location_city (STRING), latitude (FLOAT64), 
-        longitude (FLOAT64), status (STRING), timestamp (TIMESTAMP)
+        transaction_id (STRING), farmer_name (STRING), buyer_name (STRING), 
+        produce_type (STRING), quantity_kg (FLOAT64), final_price_per_kg (FLOAT64), 
+        mandi_price_per_kg (FLOAT64), commission_saved (FLOAT64), 
+        extra_profit (FLOAT64), location_city (STRING), timestamp (TIMESTAMP)
       
       RULES:
       - Only generate SELECT statements. Never use INSERT, UPDATE, DELETE, DROP, etc.
-      - Always reference the full table path: \`${PROJECT_ID}.annapurna_telemetry.truck_telemetry\`
+      - Always reference the full table path: \`${PROJECT_ID}.annapurna_marketplace.transactions\`
       - Limit results to 50 rows max using LIMIT clause
       - Use meaningful column aliases for readability
+
+      Answer farmer-centric questions like:
+      - "How much extra profit did farmers make this week?"
+      - "What is the average commission saved per transaction?"
+      - "Which produce has the highest buyer demand?"
 
       Also provide a brief, helpful summary answering the question.
       Format your response as a raw JSON object (without markdown blocks) like this:
@@ -59,7 +64,7 @@ export async function POST(req: Request) {
         parsedResponse = JSON.parse(jsonString.trim());
     } catch (e) {
         parsedResponse = {
-            sql: `SELECT truck_id, temperature_celsius, status, location_city FROM \`${PROJECT_ID}.annapurna_telemetry.truck_telemetry\` LIMIT 10`,
+            sql: `SELECT transaction_id, produce_type, extra_profit, location_city FROM \`${PROJECT_ID}.annapurna_marketplace.transactions\` LIMIT 10`,
             summary: responseText,
         };
     }

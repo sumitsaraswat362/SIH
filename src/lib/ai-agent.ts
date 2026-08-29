@@ -42,7 +42,7 @@ export async function makeDecision(cargo: Cargo): Promise<AIDecision> {
     const monitorAgent = new LlmAgent({
       name: "MarketMonitorAgent",
       model,
-      instruction: "Monitors live mandi prices, produce freshness levels, and market demand signals. Output a risk level (low, high, critical) and estimated spoilage time."
+      instruction: "Monitors live agricultural market prices across APMC mandis, tracks produce freshness levels, and detects price volatility that could affect farmer earnings"
     });
 
     // Agent 2: MarketAgent
@@ -63,20 +63,20 @@ export async function makeDecision(cargo: Cargo): Promise<AIDecision> {
     const negotiationAgent = new LlmAgent({
       name: "NegotiationAgent",
       model,
-      instruction: "Estimate value recovery percentage if the produce is liquidated at the target buyer."
+      instruction: "Autonomously negotiates with buyers on behalf of farmers. Goal: maximize farmer profit by eliminating the 30% commission agent cut"
     });
 
     // Tools for the MatchmakingAgent to orchestrate the others
     const runMonitorTool = new FunctionTool({
       name: "run_monitor_agent",
-      description: "Ask the MarketMonitorAgent to evaluate freshness risk.",
+      description: "Ask the MarketMonitorAgent to evaluate market conditions and prices.",
       parameters: z.object({}),
       execute: async () => ({ risk: spoilageMinutes < (etaMinutes || 999) ? "critical" : "low", spoilageMinutes })
     });
 
     const runMarketTool = new FunctionTool({
       name: "run_market_agent",
-      description: "Ask the MarketAgent for the best buyer.",
+      description: "Ask the MarketAgent for the best buyer to maximize farmer profit.",
       parameters: z.object({}),
       execute: async () => {
         const viable = (reroutableMarkets || []).filter(m => m.etaMinutes < spoilageMinutes - 10).sort((a,b) => a.etaMinutes - b.etaMinutes);
@@ -88,7 +88,8 @@ export async function makeDecision(cargo: Cargo): Promise<AIDecision> {
     const decisionAgent = new LlmAgent({
       name: "MatchmakingAgent",
       model,
-      instruction: `Matches farmer produce listings with optimal verified wholesale buyers using 6-dimensional scoring. Orchestrate the sub-agents by calling their tools.
+      instruction: `Matches farmer produce listings with optimal verified wholesale buyers using 6-dimensional scoring: price premium, buyer reliability, distance, freshness window, transport cost, and FSSAI compliance.
+You are an agricultural marketplace AI. Help farmers get the best price for their produce. Understand mandi rates, seasonal pricing, and buyer verification.
 Based on their findings, respond ONLY with a valid JSON object matching this structure:
 {
   "recommendation": "continue" | "reroute" | "emergency_sell",
@@ -105,7 +106,7 @@ Based on their findings, respond ONLY with a valid JSON object matching this str
     const executeRunner = async () => {
       let finalResponseText = "";
       for await (const event of runner.runEphemeral({
-        userId: "fleet_manager",
+        userId: "farmer",
         newMessage: { parts: [{ text: promptInput }] }
       })) {
         const ev = event as any;

@@ -152,7 +152,7 @@ export default function NegotiationPanel({ cargo, bid, onClose }: NegotiationPan
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId: bid.id,
-          sender: user?.name || "Wholesaler",
+          sender: user?.name || "Buyer",
           message: msg,
           timestamp: Date.now()
         })
@@ -176,8 +176,8 @@ export default function NegotiationPanel({ cargo, bid, onClose }: NegotiationPan
         <div className="p-4 border-b border-[var(--separator)] flex justify-between items-center bg-[var(--fill-secondary)]">
           <div>
             <h2 className="text-lg font-bold text-[var(--text-primary)]">Negotiating: {cargo.type}</h2>
-            <p className="text-xs text-[var(--text-secondary)]">
-              Asking Price: ₹{cargo.askingPricePerKg}/kg | Spoilage: {cargo.spoilageTimeMinutes}m
+            <p className="text-xs text-[var(--text-secondary)] mt-1">
+              Asking Price: ₹{cargo.askingPricePerKg}/kg <span className="text-[#FF9500] ml-2">vs Local Mandi: ₹{(cargo.askingPricePerKg * 0.7).toFixed(0)}/kg</span>
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--fill-tertiary)] text-[var(--text-secondary)]">
@@ -198,7 +198,7 @@ export default function NegotiationPanel({ cargo, bid, onClose }: NegotiationPan
                 }`}>
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold opacity-80 uppercase">
-                      {msg.sender === "wholesaler" ? "You" : "Fleet AI"}
+                      {msg.sender === "wholesaler" ? "You (Buyer)" : "Farmer AI"}
                     </span>
                     {msg.price && (
                       <span className="font-mono font-bold text-sm bg-white/20 px-2 py-0.5 rounded">
@@ -229,7 +229,7 @@ export default function NegotiationPanel({ cargo, bid, onClose }: NegotiationPan
             <div className="flex justify-start">
               <div className="bg-[var(--fill-secondary)] text-[var(--text-primary)] border border-[var(--separator)] rounded-2xl rounded-bl-sm p-4">
                 <p className="text-sm animate-pulse flex items-center gap-2">
-                  <span className="w-2 h-2 bg-[#007AFF] rounded-full"></span> AI evaluating offer...
+                  <span className="w-2 h-2 bg-[#007AFF] rounded-full"></span> AI negotiating to eliminate middleman commission...
                 </p>
               </div>
             </div>

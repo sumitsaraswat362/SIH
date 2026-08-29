@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
 
     const result = await client.messages.create({
-      body: message || '🚨 Annapurna Cold Chain Alert: A cargo shipment needs immediate attention!',
+      body: message || 'Annapurna AI: We found a buyer for your produce at a premium price (more than local mandi rate). Reply YES to accept.',
       from: from,
       to: formattedTo,
     });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       type: 'whatsapp',
       to: formattedTo,
       subject: 'WhatsApp Alert',
-      body: message || '🚨 Annapurna Cold Chain Alert: A cargo shipment needs immediate attention!',
+      body: message || 'Annapurna AI: We found a buyer for your produce at a premium price (more than local mandi rate). Reply YES to accept.',
       timestamp: FieldValue.serverTimestamp(),
       status: 'success'
     });

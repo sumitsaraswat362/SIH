@@ -4,12 +4,16 @@ import { ai, DEFAULT_MODEL } from '@/lib/vertex-client';
 export async function GET() {
   try {
     const prompt = `You are the backend logic for an autonomous "Nerve Center" dashboard that monitors an agricultural marketplace.
-Generate a realistic sequence of 8-10 terminal log entries representing a sudden supply chain event and how the multi-agent system autonomously handled it.
+Generate a realistic sequence of 8-10 terminal log entries representing market events and how the multi-agent system autonomously handled them.
 
 Examples of events:
-- A sudden temperature spike in a farmer's cold storage.
-- A transportation delay affecting delivery windows for perishable produce.
-- A sudden market demand surge allowing farmers to dynamically auction off excess produce.
+- "Fetching today's onion rates from Nashik APMC..."
+- "Mandi price alert: Tomato rate dropped 18% in Vashi market"
+- "MarketMonitorAgent: Matching 500kg Alphonso mangoes with premium export buyer"
+- "MatchmakingAgent: Found 3 verified buyers within 50km radius"
+- "NegotiationAgent: Counter-offer sent. Farmer's price: ₹35/kg vs Buyer offer: ₹28/kg"
+- "Deal closed: ₹4,200 more earned than local mandi price"
+- "Commission agent bypassed. Farmer saved ₹12,600 in intermediary fees"
 
 The agents involved:
 - 'System': Core system initializing or confirming final actions.

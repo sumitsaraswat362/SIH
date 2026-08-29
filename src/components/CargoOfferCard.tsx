@@ -2,22 +2,22 @@
 
 import { useState, useEffect } from "react";
 import CountdownTimer from "./CountdownTimer";
-import { Cargo, Bid } from "@/lib/types";
+import { Produce, Bid } from "@/lib/types";
 
-interface CargoOfferCardProps {
-  cargo: Cargo;
+interface ProduceOfferCardProps {
+  produce: Produce;
   distance: number;
   etaMinutes: number;
-  onAcceptFull: (cargoId: string) => void;
-  onAcceptPartial: (cargoId: string, quantity: number) => void;
-  onCounterOffer: (cargoId: string, pricePerKg: number, quantity: number) => void;
-  onNegotiate?: (cargoId: string) => void;
+  onAcceptFull: (produceId: string) => void;
+  onAcceptPartial: (produceId: string, quantity: number) => void;
+  onCounterOffer: (produceId: string, pricePerKg: number, quantity: number) => void;
+  onNegotiate?: (produceId: string) => void;
   existingBid?: Bid;
   matchScore?: number;
 }
 
-export default function CargoOfferCard({
-  cargo,
+export default function ProduceOfferCard({
+  produce,
   distance,
   etaMinutes,
   onAcceptFull,
@@ -26,23 +26,23 @@ export default function CargoOfferCard({
   onNegotiate,
   existingBid,
   matchScore,
-}: CargoOfferCardProps) {
+}: ProduceOfferCardProps) {
   const [mode, setMode] = useState<"idle" | "partial" | "counter">("idle");
-  const [partialQty, setPartialQty] = useState(Math.floor(cargo.quantityKg / 2));
+  const [partialQty, setPartialQty] = useState(Math.floor(produce.quantityKg / 2));
   
   // If there's a counter offer from logistics, use it as default
   const defaultPrice = existingBid?.status === "counter_offered" && existingBid.counterPricePerKg
     ? existingBid.counterPricePerKg
-    : (cargo.askingPricePerKg ? cargo.askingPricePerKg - 2 : 10);
+    : (produce.askingPricePerKg ? produce.askingPricePerKg - 2 : 10);
     
   const [counterPrice, setCounterPrice] = useState(defaultPrice);
-  const [counterQty, setCounterQty] = useState(cargo.quantityKg);
+  const [counterQty, setCounterQty] = useState(produce.quantityKg);
   const [accepted, setAccepted] = useState(false);
 
   const urgency =
-    cargo.telemetry.temperature > cargo.safeTemperatureMax + 5
+    produce.telemetry.temperature > produce.safeTemperatureMax + 5
       ? "critical"
-      : cargo.telemetry.temperature > cargo.safeTemperatureMax
+      : produce.telemetry.temperature > produce.safeTemperatureMax
       ? "warning"
       : "normal";
 
@@ -75,7 +75,7 @@ export default function CargoOfferCard({
           </div>
           <h3 className="text-lg font-semibold text-[#34C759] mb-1">Order Placed!</h3>
           <p className="text-sm text-[#8E8E93]">
-            {(cargo.type || "cargo").charAt(0).toUpperCase() + (cargo.type || "cargo").slice(1)} · Truck arriving in ~{etaMinutes} min
+            {(produce.type || "produce").charAt(0).toUpperCase() + (produce.type || "produce").slice(1)} · Batch arriving in ~{etaMinutes} min
           </p>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function CargoOfferCard({
           <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-[#FF3B30] animate-pulse-danger shadow-[0_0_15px_rgba(255,59,48,0.5)]">
             <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_5px_white]" />
             <span className="text-[11px] font-bold text-white uppercase tracking-wider">
-              Urgent — Respond Immediately
+              Fresh — List for Direct Sale
             </span>
           </div>
         )}
@@ -102,7 +102,7 @@ export default function CargoOfferCard({
           <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-xl bg-[#FF9500] shadow-[0_0_15px_rgba(255,149,0,0.3)]">
             <span className="w-2 h-2 rounded-full bg-white shadow-[0_0_5px_white]" />
             <span className="text-[11px] font-bold text-white uppercase tracking-wider">
-              Warning — Cold Chain at Risk
+              Warning — Freshness Window Closing
             </span>
           </div>
         )}
@@ -111,13 +111,13 @@ export default function CargoOfferCard({
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="text-xl font-bold text-[var(--text-primary)]">
-              {(cargo.type || "cargo").charAt(0).toUpperCase() + (cargo.type || "cargo").slice(1)}
+              {(produce.type || "produce").charAt(0).toUpperCase() + (produce.type || "produce").slice(1)}
               <span className="font-[family-name:var(--font-mono)] text-[var(--text-tertiary)] text-sm ml-2 font-semibold bg-[var(--fill-secondary)] px-2 py-1 rounded-md">
-                {(cargo.quantityKg / 1000).toFixed(0)} Tonnes
+                {(produce.quantityKg / 1000).toFixed(0)} Tonnes
               </span>
             </h3>
             <p className="text-xs text-[var(--text-secondary)] mt-1.5 font-medium">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#34C759] mr-1"></span> Truck: {cargo.truckPlate} · From {cargo.origin.name}
+              <span className="inline-block w-2 h-2 rounded-full bg-[#34C759] mr-1"></span> Batch: {produce.truckPlate} · From Farm {produce.origin.name}
             </p>
           </div>
           <div className="bg-[var(--fill-secondary)] px-3 py-1.5 rounded-xl clay">
@@ -132,7 +132,7 @@ export default function CargoOfferCard({
             <p className={`font-[family-name:var(--font-mono)] text-base font-bold mt-1 ${
               urgency === "critical" ? "text-[#FF3B30] animate-pulse" : urgency === "warning" ? "text-[#FF9500]" : "text-[#34C759]"
             }`}>
-              {(cargo.telemetry?.temperature || 0).toFixed(1)}°C
+              {(produce.telemetry?.temperature || 0).toFixed(1)}°C
             </p>
           </div>
           <div className="clay text-center p-3">
@@ -183,7 +183,7 @@ export default function CargoOfferCard({
         <span className="text-sm font-semibold text-[var(--text-secondary)]">Asking Price</span>
         <div className="flex flex-col items-end">
           <span className="font-[family-name:var(--font-mono)] text-2xl font-bold text-[#34C759] drop-shadow-sm">
-            ₹{cargo.askingPricePerKg ?? 0}/kg
+            ₹{produce.askingPricePerKg ?? 0}/kg
           </span>
         </div>
       </div>
@@ -192,7 +192,7 @@ export default function CargoOfferCard({
       {existingBid && existingBid.status === "counter_offered" && existingBid.counterPricePerKg && mode === "idle" && (
         <div className="mb-5 p-4 rounded-xl glass bg-[#AF52DE]/10 border border-[#AF52DE]/30 shadow-[0_4px_15px_rgba(175,82,222,0.15)]">
           <p className="text-[10px] text-[#AF52DE] uppercase tracking-widest block mb-2 font-bold">
-            Logistics Countered Your Bid
+            Farmer Countered Your Bid
           </p>
           <div className="flex justify-between items-center mb-4">
             <span className="text-sm font-medium text-[var(--text-primary)]">They want:</span>
@@ -203,7 +203,7 @@ export default function CargoOfferCard({
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => {
-                onAcceptFull(cargo.id);
+                onAcceptFull(produce.id);
                 setAccepted(true);
               }}
               className="skeuomorphic-btn skeuomorphic-primary flex-1 text-sm py-3 font-bold"
@@ -212,7 +212,7 @@ export default function CargoOfferCard({
             </button>
             {onNegotiate && (
               <button
-                onClick={() => onNegotiate(cargo.id)}
+                onClick={() => onNegotiate(produce.id)}
                 className="skeuomorphic-btn flex-1 text-sm py-3 font-bold text-[var(--text-primary)]"
               >
                 Negotiate
@@ -228,7 +228,7 @@ export default function CargoOfferCard({
            <span className="text-sm font-bold text-[#007AFF] block mb-3">Your Bid is Pending Review...</span>
            {onNegotiate && (
              <button
-               onClick={() => onNegotiate(cargo.id)}
+               onClick={() => onNegotiate(produce.id)}
                className="skeuomorphic-btn skeuomorphic-primary w-full text-sm py-2 font-bold"
              >
                Open AI Negotiation Panel
@@ -247,7 +247,7 @@ export default function CargoOfferCard({
             <input
               type="range"
               min={500}
-              max={cargo.quantityKg}
+              max={produce.quantityKg}
               step={500}
               value={partialQty}
               onChange={(e) => setPartialQty(Number(e.target.value))}
@@ -258,12 +258,12 @@ export default function CargoOfferCard({
             </span>
           </div>
           <div className="flex justify-between mt-3 text-sm font-medium text-[var(--text-secondary)]">
-            <span>Total: ₹{((cargo.askingPricePerKg ?? 0) * partialQty).toLocaleString("en-IN")}</span>
+            <span>Total: ₹{((produce.askingPricePerKg ?? 0) * partialQty).toLocaleString("en-IN")}</span>
           </div>
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => {
-                onAcceptPartial(cargo.id, partialQty);
+                onAcceptPartial(produce.id, partialQty);
                 setAccepted(true);
               }}
               className="skeuomorphic-btn skeuomorphic-primary flex-1 text-sm py-3 font-bold"
@@ -303,7 +303,7 @@ export default function CargoOfferCard({
                 onChange={(e) => setCounterQty(Number(e.target.value))}
                 className="ios-input font-[family-name:var(--font-mono)] text-base font-bold"
                 min={500}
-                max={cargo.quantityKg}
+                max={produce.quantityKg}
                 step={500}
               />
             </div>
@@ -314,7 +314,7 @@ export default function CargoOfferCard({
           <div className="flex gap-3">
             <button
               onClick={() => {
-                onCounterOffer(cargo.id, counterPrice, counterQty);
+                onCounterOffer(produce.id, counterPrice, counterQty);
                 setAccepted(true);
               }}
               className="skeuomorphic-btn skeuomorphic-primary flex-1 text-sm py-3 font-bold"
@@ -333,7 +333,7 @@ export default function CargoOfferCard({
         <div className="grid grid-cols-3 gap-3">
           <button
             onClick={() => {
-              onAcceptFull(cargo.id);
+              onAcceptFull(produce.id);
               setAccepted(true);
             }}
             className="skeuomorphic-btn skeuomorphic-primary text-sm py-3.5 flex flex-col items-center gap-1.5 font-bold hover:scale-[1.02]"

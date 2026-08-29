@@ -18,12 +18,12 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-export default function WholesalerDashboard() {
+export default function BuyerDashboard() {
   const { state, dispatch } = useAppState();
   const [activeTab, setActiveTab] = useState<"offers" | "orders" | "qa" | "doc-ai">("offers");
   const [negotiatingBidId, setNegotiatingBidId] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<{ spoilagePercentage: number, reasoning: string } | null>(null);
+  const [scanResult, setScanResult] = useState<{ qualityRating: number, reasoning: string } | null>(null);
   const [isScanningDoc, setIsScanningDoc] = useState(false);
   const [docResult, setDocResult] = useState<{ weight: string, tempRequired: string, price: string, date: string, type: string } | null>(null);
 
@@ -288,9 +288,9 @@ export default function WholesalerDashboard() {
 
   const { user, logout } = useAuth();
   
-  // Real orders (accepted bids by this wholesaler)
+  // Real orders (accepted bids by this buyer)
   const orders = state.bids.filter(
-    (b) => b.wholesalerId === user?.name && (b.status === "accepted" || b.status === "delivered" || b.status === "payment_cleared")
+    (b) => b.buyerId === user?.name && (b.status === "accepted" || b.status === "delivered" || b.status === "payment_cleared")
   );
 
   const upcomingCargosRaw = state.cargos.filter(
@@ -309,7 +309,7 @@ export default function WholesalerDashboard() {
     const cargo = state.cargos.find(c => c.id === cargoId);
     if (!cargo || !user) return;
     
-    const existingBid = state.bids.find(b => b.cargoId === cargoId && b.wholesalerId === user.name);
+    const existingBid = state.bids.find(b => b.cargoId === cargoId && b.buyerId === user.name);
     
     if (existingBid) {
       // Just update the existing bid if they are countering a counter-offer
@@ -317,16 +317,16 @@ export default function WholesalerDashboard() {
         type: "UPDATE_BID_STATUS", 
         bidId: existingBid.id, 
         status: "pending",
-        counterPrice: undefined // Reset counter price since wholesaler responded
+        counterPrice: undefined // Reset counter price since buyer responded
       });
       // We also need to update offered price, but for demo just status is enough to show pending
     } else {
       const newBid: Bid = {
         id: `bid-${Date.now()}`,
         cargoId: cargoId,
-        wholesalerId: user.name, // using name as ID for demo
-        wholesalerName: user.name,
-        wholesalerLocation: user.location || "Local Operations",
+        buyerId: user.name, // using name as ID for demo
+        buyerName: user.name,
+        buyerLocation: user.location || "Local Operations",
         offeredPricePerKg: price,
         requestedQuantityKg: qty,
         totalValue: price * qty,
@@ -360,7 +360,7 @@ export default function WholesalerDashboard() {
       console.error("Scan failed", error);
       // Client-side fallback to guarantee demo works
       setScanResult({
-        spoilagePercentage: 45,
+        qualityRating: 45,
         reasoning: "Visual analysis detects significant bruising and fungal growth characteristic of late-stage spoilage."
       });
     } finally {
@@ -397,7 +397,7 @@ export default function WholesalerDashboard() {
     } catch (error) {
       console.error("Scan failed", error);
       setScanResult({
-        spoilagePercentage: 15,
+        qualityRating: 15,
         reasoning: "Minor surface defects detected, but generally within acceptable retail limits. 15% estimated cull rate."
       });
     } finally {
@@ -496,7 +496,7 @@ export default function WholesalerDashboard() {
               <p className="text-base font-bold bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent drop-shadow-sm">
                 Annapurna
               </p>
-              <p className="text-[11px] font-medium text-[var(--text-tertiary)]">Wholesaler Portal</p>
+              <p className="text-[11px] font-medium text-[var(--text-tertiary)]">Buyer Portal</p>
             </div>
           </Link>
 
@@ -521,7 +521,7 @@ export default function WholesalerDashboard() {
                 {user?.name?.charAt(0).toUpperCase() || "W"}
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[#FF3B30]">{user?.name || "Wholesaler"}</p>
+                <p className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[#FF3B30]">{user?.name || "Buyer"}</p>
                 <p className="text-xs font-medium text-[var(--text-tertiary)] max-w-[150px] truncate">{user?.location || "Local Operations"}</p>
               </div>
             </div>
@@ -579,7 +579,7 @@ export default function WholesalerDashboard() {
                 : "text-[var(--text-secondary)] hover:bg-[var(--fill-tertiary)]"
             }`}
           >
-            Vision QA
+            Inspect Produce Quality
           </button>
           <button
             onClick={() => handleTabClick("doc-ai")}
@@ -847,7 +847,7 @@ export default function WholesalerDashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                   {emergencyCargos.map((cargo, idx) => {
-                    const existingBid = state.bids.find(b => b.cargoId === cargo.id && b.wholesalerId === user?.name);
+                    const existingBid = state.bids.find(b => b.cargoId === cargo.id && b.buyerId === user?.name);
                     const isRecommended = sortBy === "best_match" && idx === 0;
                     return (
                     <div key={cargo.id} className="relative">
@@ -862,7 +862,7 @@ export default function WholesalerDashboard() {
                         onAcceptPartial={(id, qty) => handleSendBid(id, cargo.askingPricePerKg || Math.round(cargo.estimatedCargoValue / cargo.quantityKg), qty)}
                         onCounterOffer={(id, price, qty) => handleSendBid(id, price, qty)}
                         onNegotiate={(id) => {
-                          const b = state.bids.find(x => x.cargoId === id && x.wholesalerId === user?.name);
+                          const b = state.bids.find(x => x.cargoId === id && x.buyerId === user?.name);
                           if (b) setNegotiatingBidId(b.id);
                         }}
                       />
@@ -883,7 +883,7 @@ export default function WholesalerDashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                   {upcomingCargos.map((cargo, idx) => {
-                    const existingBid = state.bids.find(b => b.cargoId === cargo.id && b.wholesalerId === user?.name);
+                    const existingBid = state.bids.find(b => b.cargoId === cargo.id && b.buyerId === user?.name);
                     const isRecommended = sortBy === "best_match" && idx === 0 && emergencyCargos.length === 0;
                     return (
                     <div key={cargo.id} className="relative">
@@ -898,7 +898,7 @@ export default function WholesalerDashboard() {
                         onAcceptPartial={(id, qty) => handleSendBid(id, cargo.askingPricePerKg || Math.round(cargo.estimatedCargoValue / cargo.quantityKg), qty)}
                         onCounterOffer={(id, price, qty) => handleSendBid(id, price, qty)}
                         onNegotiate={(id) => {
-                          const b = state.bids.find(x => x.cargoId === id && x.wholesalerId === user?.name);
+                          const b = state.bids.find(x => x.cargoId === id && x.buyerId === user?.name);
                           if (b) setNegotiatingBidId(b.id);
                         }}
                       />
@@ -1141,16 +1141,16 @@ export default function WholesalerDashboard() {
                   <div className="bg-[var(--fill-secondary)] rounded-2xl p-6 text-left border border-[var(--separator)] animate-in fade-in zoom-in duration-300">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold text-[var(--text-primary)]">Scan Results</h3>
-                      <span className={`badge ${scanResult.spoilagePercentage > 20 ? 'badge-danger' : 'badge-safe'} shadow-sm`}>
-                        {scanResult.spoilagePercentage}% Spoilage
+                      <span className={`badge ${scanResult.qualityRating > 20 ? 'badge-danger' : 'badge-safe'} shadow-sm`}>
+                        {scanResult.qualityRating}% Spoilage
                       </span>
                     </div>
                     
                     <div className="mb-4">
                       <div className="h-2 w-full bg-[var(--fill-tertiary)] rounded-full overflow-hidden">
                         <div 
-                          className={`h-full rounded-full ${scanResult.spoilagePercentage > 20 ? 'bg-[#FF3B30]' : 'bg-[#34C759]'}`}
-                          style={{ width: `${scanResult.spoilagePercentage}%` }}
+                          className={`h-full rounded-full ${scanResult.qualityRating > 20 ? 'bg-[#FF3B30]' : 'bg-[#34C759]'}`}
+                          style={{ width: `${scanResult.qualityRating}%` }}
                         />
                       </div>
                     </div>
@@ -1171,12 +1171,12 @@ export default function WholesalerDashboard() {
                       </button>
                       <button 
                         className={`flex-1 py-3 px-4 rounded-xl font-bold text-white shadow-lg transition-all ${
-                          scanResult.spoilagePercentage > 20 
+                          scanResult.qualityRating > 20 
                             ? 'bg-[#FF3B30] hover:bg-[#FF3B30]/90 shadow-[#FF3B30]/20' 
                             : 'bg-[#34C759] hover:bg-[#34C759]/90 shadow-[#34C759]/20'
                         }`}
                       >
-                        {scanResult.spoilagePercentage > 20 ? 'Reject Cargo' : 'Accept Cargo'}
+                        {scanResult.qualityRating > 20 ? 'Reject Cargo' : 'Accept Cargo'}
                       </button>
                     </div>
                   </div>

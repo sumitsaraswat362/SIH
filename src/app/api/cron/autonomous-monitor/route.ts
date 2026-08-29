@@ -8,7 +8,7 @@ export async function GET() {
     const results = await runAutonomousCycle();
     return NextResponse.json({ success: true, data: results });
   } catch (error: any) {
-    console.error("[Autonomous Monitor] Error during cycle:", error);
+    console.error("[Autonomous Market Monitor] Error during cycle:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Internal Server Error" },
       { status: 500 }

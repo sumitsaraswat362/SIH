@@ -22,7 +22,7 @@ const LiveMap = dynamic(() => import("@/components/LiveMap"), { ssr: false });
 // ============================================================================
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "grid" },
-  { id: "fleet", label: "Produce Logistics Tracker", icon: "truck" },
+  { id: "logistics", label: "Produce Logistics Tracker", icon: "delivery" },
   { id: "alerts", label: "Active Alerts", icon: "bell" },
   { id: "marketplace", label: "Marketplace", icon: "store" },
   { id: "analytics", label: "Analytics", icon: "chart" },
@@ -31,7 +31,7 @@ const NAV_ITEMS = [
 
 const TAB_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "grid" },
-  { id: "fleet", label: "Fleet", icon: "truck" },
+  { id: "logistics", label: "Active Deliveries", icon: "delivery" },
   { id: "alerts", label: "Alerts", icon: "bell" },
   { id: "marketplace", label: "Market", icon: "store" },
   { id: "settings", label: "Settings", icon: "gear" },
@@ -41,7 +41,7 @@ function NavIcon({ icon, className = "" }: { icon: string; className?: string })
   const c = `w-5 h-5 ${className}`;
   switch (icon) {
     case "grid": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z" /></svg>;
-    case "truck": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>;
+    case "delivery": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>;
     case "bell": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>;
     case "store": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" /></svg>;
     case "chart": return <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>;
@@ -54,10 +54,10 @@ function NavIcon({ icon, className = "" }: { icon: string; className?: string })
 // ============================================================================
 // MAIN LAYOUT
 // ============================================================================
-export default function FleetApp() {
+export default function ActiveDeliveriesApp() {
   const { state, dispatch } = useAppState();
   const { user, logout } = useAuth();
-  const [activeNav, setActiveNav] = useState("fleet"); // Default to fleet for hackathon
+  const [activeNav, setActiveNav] = useState("logistics"); // Default to logistics for hackathon
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -79,7 +79,7 @@ export default function FleetApp() {
       if (NAV_ITEMS.some(i => i.id === hash) || TAB_ITEMS.some(i => i.id === hash)) {
         setActiveNav(hash);
       } else {
-        setActiveNav("fleet");
+        setActiveNav("logistics");
       }
     };
     window.addEventListener("hashchange", handleHashChange);
@@ -90,7 +90,7 @@ export default function FleetApp() {
 
 
   // Derived state for sidebar badges
-  const emergencyCount = state.cargos.filter((c) => (c.status === "emergency" || c.status === "rerouting") && c.quantityKg > 0 && !isNaN(c.quantityKg)).length;
+  const priceAlertCount = state.cargos.filter((c) => (c.status === "emergency" || c.status === "rerouting") && c.quantityKg > 0 && !isNaN(c.quantityKg)).length;
   const newBidsCount = state.bids.filter((b) => b.status === "pending").length;
   const unreadAlerts = state.notifications.filter((n) => !n.read).length;
 
@@ -266,7 +266,7 @@ export default function FleetApp() {
           </div>
           <div>
             <p className="text-base font-bold bg-gradient-to-r from-[#007AFF] to-[#34C759] bg-clip-text text-transparent drop-shadow-sm">Annapurna</p>
-            <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mt-0.5">Fleet Command</p>
+            <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mt-0.5">Produce Logistics Tracker</p>
           </div>
         </Link>
 
@@ -324,7 +324,7 @@ export default function FleetApp() {
           {/* View Router */}
           <div className="view-transition-enter-active relative z-10">
             {activeNav === "dashboard" && <DashboardView />}
-            {activeNav === "fleet" && <FleetTrackingView />}
+            {activeNav === "logistics" && <ActiveDeliveriesTrackingView />}
             {activeNav === "alerts" && <AlertsView />}
             {activeNav === "marketplace" && <MarketplaceView />}
             {activeNav === "analytics" && <AnalyticsView />}
@@ -332,7 +332,7 @@ export default function FleetApp() {
           </div>
         </div>
       </main>
-      <DriverVoiceWidget />
+      <FarmerVoiceWidget />
     </div>
   );
 }
@@ -347,7 +347,7 @@ declare global {
   }
 }
 
-function DriverVoiceWidget() {
+function FarmerVoiceWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -405,7 +405,7 @@ function DriverVoiceWidget() {
               id: `cx-${Date.now()}`,
               type: "system",
               title: `Route Update (${data.intent})`,
-              message: data.response || "Driver update recorded.",
+              message: data.response || "Farmer update recorded.",
               timestamp: Date.now(),
               read: false,
             }
@@ -446,7 +446,7 @@ function DriverVoiceWidget() {
                 </div>
                 <h3 className="text-sm font-bold text-white tracking-tight">Dialogflow CX</h3>
               </div>
-              <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">Driver Comms</span>
+              <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest bg-white/10 px-2 py-1 rounded-full">Farmer Comms</span>
             </div>
             
             <div className="p-5 flex flex-col items-center">
@@ -477,7 +477,7 @@ function DriverVoiceWidget() {
 
               <div className="w-full min-h-[60px] bg-black/30 rounded-xl p-3 border border-white/5 relative overflow-hidden">
                 {!transcript && !isListening && !isProcessing && (
-                  <p className="text-xs text-white/40 text-center italic mt-3">Click mic to initiate driver report...</p>
+                  <p className="text-xs text-white/40 text-center italic mt-3">Click mic to initiate farmer report...</p>
                 )}
                 {isProcessing && (
                   <p className="text-xs text-[#007AFF] text-center italic mt-3 flex justify-center gap-1">
@@ -522,7 +522,7 @@ function DriverVoiceWidget() {
                     </div>
                     <div className="mt-3 text-[10px] text-[#007AFF] font-bold flex items-center justify-center gap-1 bg-[#007AFF]/10 rounded-md py-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#007AFF] animate-pulse"></span>
-                      Updating Fleet Map...
+                      Updating Active Deliveries Map...
                     </div>
                   </motion.div>
                 )}
@@ -568,7 +568,7 @@ function DashboardView() {
 
   const totalCargos = myCargos.length;
   const totalValue = myCargos.reduce((acc, c) => acc + c.estimatedCargoValue, 0);
-  const emergencyCargos = myCargos.filter((c) => c.status === "emergency").length;
+  const priceAlertCargos = myCargos.filter((c) => c.status === "emergency").length;
   const reroutedCargos = myCargos.filter((c) => c.status === "rerouting").length;
 
   const totalCarbonTokens = state.carbonTokens.reduce((acc, token) => acc + token.amount, 0);
@@ -585,9 +585,9 @@ function DashboardView() {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
         <div className="kpi-card relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
-            <NavIcon icon="truck" className="w-16 h-16 text-[#007AFF]" />
+            <NavIcon icon="delivery" className="w-16 h-16 text-[#007AFF]" />
           </div>
-          <p className="kpi-label uppercase tracking-wider">Active Fleet</p>
+          <p className="kpi-label uppercase tracking-wider">Active Deliveries</p>
           <p className="kpi-value text-[var(--text-primary)]">{totalCargos}</p>
           <p className="text-xs text-[#34C759] mt-2 flex items-center gap-1 font-medium">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" /></svg>
@@ -599,17 +599,17 @@ function DashboardView() {
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <svg className="w-16 h-16 text-[#34C759]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
           </div>
-          <p className="kpi-label uppercase tracking-wider">Total Cargo Value</p>
+          <p className="kpi-label uppercase tracking-wider">Total Produce Value</p>
           <p className="kpi-value text-[#34C759]">₹{(totalValue / 100000).toFixed(2)}L</p>
           <p className="text-xs text-[var(--text-tertiary)] mt-2 font-medium">Insured up to ₹1.0Cr</p>
         </div>
 
-        <div className={`kpi-card relative overflow-hidden transition-all duration-500 ${emergencyCargos > 0 ? 'ring-2 ring-[#FF3B30]/40' : ''}`}>
+        <div className={`kpi-card relative overflow-hidden transition-all duration-500 ${priceAlertCargos > 0 ? 'ring-2 ring-[#FF3B30]/40' : ''}`}>
           <div className="absolute top-0 right-0 p-4 opacity-10">
-            <NavIcon icon="bell" className={`w-16 h-16 ${emergencyCargos > 0 ? 'text-[#FF3B30]' : 'text-[#FF9500]'}`} />
+            <NavIcon icon="bell" className={`w-16 h-16 ${priceAlertCargos > 0 ? 'text-[#FF3B30]' : 'text-[#FF9500]'}`} />
           </div>
           <p className="kpi-label uppercase tracking-wider">Critical Alerts</p>
-          <p className={`kpi-value ${emergencyCargos > 0 ? 'text-[#FF3B30] animate-pulse-danger' : 'text-[var(--text-primary)]'}`}>{emergencyCargos}</p>
+          <p className={`kpi-value ${priceAlertCargos > 0 ? 'text-[#FF3B30] animate-pulse-danger' : 'text-[var(--text-primary)]'}`}>{priceAlertCargos}</p>
           <p className="text-xs text-[var(--text-tertiary)] mt-2 font-medium">Requiring immediate attention</p>
         </div>
 
@@ -617,7 +617,7 @@ function DashboardView() {
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <NavIcon icon="shield" className="w-16 h-16 text-[#007AFF]" />
           </div>
-          <p className="kpi-label uppercase tracking-wider">Cargos Saved</p>
+          <p className="kpi-label uppercase tracking-wider">Autonomously Matched</p>
           <p className="kpi-value text-[#007AFF]">{reroutedCargos}</p>
           <p className="text-xs text-[#007AFF] mt-2 font-medium">Autonomously rerouted</p>
         </div>
@@ -642,7 +642,7 @@ function DashboardView() {
       <div className="ios-card p-8 h-96 flex flex-col items-center justify-center relative overflow-hidden group bg-gradient-to-br from-[var(--bg-secondary)] to-[#007AFF]/5">
         <h3 className="absolute top-6 left-6 text-xl font-bold text-[var(--text-primary)] mb-2 flex items-center gap-2">
           <NavIcon icon="grid" className="w-5 h-5 text-[#007AFF]" />
-          Global Fleet Topology
+          Global Active Deliveries Topology
         </h3>
         
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,122,255,0.05)_0%,transparent_70%)] pointer-events-none" />
@@ -726,13 +726,13 @@ function DashboardView() {
 // ============================================================================
 // VIEW 2: FLEET TRACKING (The Core Simulation View)
 // ============================================================================
-function FleetTrackingView() {
+function ActiveDeliveriesTrackingView() {
   const { state, dispatch } = useAppState();
   const { user } = useAuth();
-  const iotCargos = useIoTStream(8); // 8 mock trucks
+  const iotCargos = useIoTStream(8); // 8 mock deliverys
   
   // Only show cargos owned by this user
-  // Exclude delivered cargos from active fleet view
+  // Exclude delivered cargos from active logistics view
   const baseCargos = state.cargos
     .filter(c => (!c.ownerId || c.ownerId === user?.name) && c.status !== "delivered" && c.quantityKg > 0 && !isNaN(c.quantityKg))
     .map(c => ({
@@ -748,7 +748,7 @@ function FleetTrackingView() {
   const [filterTempMin, setFilterTempMin] = useState<string>("");
   const [filterTempMax, setFilterTempMax] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
-  const [filterDriverName, setFilterDriverName] = useState<string>("");
+  const [filterFarmerName, setFilterFarmerName] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("default");
 
   const filteredCargos = myCargos
@@ -757,9 +757,9 @@ function FleetTrackingView() {
       if (filterTempMin !== "" && cargo.telemetry.temperature < Number(filterTempMin)) return false;
       if (filterTempMax !== "" && cargo.telemetry.temperature > Number(filterTempMax)) return false;
       if (filterStatus.length > 0 && !filterStatus.includes(cargo.status)) return false;
-      if (filterDriverName !== "") {
-        const search = filterDriverName.toLowerCase();
-        if (!cargo.driverName?.toLowerCase().includes(search) && !cargo.truckPlate?.toLowerCase().includes(search)) return false;
+      if (filterFarmerName !== "") {
+        const search = filterFarmerName.toLowerCase();
+        if (!cargo.farmerName?.toLowerCase().includes(search) && !cargo.truckPlate?.toLowerCase().includes(search)) return false;
       }
       return true;
     })
@@ -773,7 +773,7 @@ function FleetTrackingView() {
 
   const [selectedCargoId, setSelectedCargoId] = useState<string>("cargo-001");
   const selectedCargo = myCargos.find((c) => c.id === selectedCargoId) || myCargos[0];
-  const [emergencyTriggered, setEmergencyTriggered] = useState(false);
+  const [priceAlertTriggered, setEmergencyTriggered] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [qualityScore, setQualityScore] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -822,7 +822,7 @@ function FleetTrackingView() {
   const [isAlertAcknowledged, setIsAlertAcknowledged] = useState(false);
   const [activeMapBid, setActiveMapBid] = useState<Bid | null>(null);
   const [negotiatingBidId, setNegotiatingBidId] = useState<string | null>(null);
-  const [driverLocation, setDriverLocation] = useState<string | null>(null);
+  const [farmerLocation, setFarmerLocation] = useState<string | null>(null);
   const [locationStatus, setLocationStatus] = useState<string>("");
 
   // Add Cargo Form States
@@ -910,11 +910,11 @@ function FleetTrackingView() {
 
       const spoilageMin = calculateSpoilageTime(frame.temperature, 10, frame.ethyleneLevel);
 
-      if (frame.temperature > 10 && !emergencyTriggered) {
+      if (frame.temperature > 10 && !priceAlertTriggered) {
         dispatch({ type: "UPDATE_CARGO_STATUS", cargoId: targetCargoId, status: "warning", spoilageMinutes: spoilageMin });
       }
 
-      if (shouldTriggerEmergency(spoilageMin, 260) && !emergencyTriggered) {
+      if (shouldTriggerEmergency(spoilageMin, 260) && !priceAlertTriggered) {
         setEmergencyTriggered(true);
         dispatch({ type: "UPDATE_CARGO_STATUS", cargoId: targetCargoId, status: "emergency", spoilageMinutes: spoilageMin });
 
@@ -937,7 +937,7 @@ function FleetTrackingView() {
               cargoId: cargo.id,
               timestamp: Date.now(),
               reasoning: `COLD CHAIN FAILURE: Temperature ${frame.temperature}°C exceeds safe limit of ${cargo.safeTemperatureMax}°C. Estimated spoilage in ${spoilageMin} minutes. ${nearestMarket ? `Emergency reroute to ${nearestMarket.name}.` : 'No viable markets found.'}`,
-              recommendation: nearestMarket ? 'reroute' : 'emergency_sell',
+              recommendation: nearestMarket ? 'reroute' : 'direct_sell',
               suggestedMarket: nearestMarket,
               estimatedRecoveryPercent: nearestMarket ? 80 : 20,
               estimatedRecoveryValue: Math.round(cargo.estimatedCargoValue * (nearestMarket ? 0.8 : 0.2)),
@@ -964,7 +964,7 @@ function FleetTrackingView() {
       dispatch({ type: "TICK_SIMULATION" });
       step++;
     }, 2000);
-  }, [dispatch, emergencyTriggered, state.cargos, selectedCargo?.id]);
+  }, [dispatch, priceAlertTriggered, state.cargos, selectedCargo?.id]);
 
   const triggerInstantBreakdown = useCallback(() => {
     if (!selectedCargo?.id) return;
@@ -985,8 +985,8 @@ function FleetTrackingView() {
     const decision: AIDecision = {
       cargoId: selectedCargo.id,
       timestamp: Date.now(),
-      reasoning: `CRITICAL SENSOR ALERT: Cooling compressor failure detected. Temperature spiked to ${failedTelemetry.temperature}°C. Immediate emergency liquidation required to prevent 100% cargo loss.`,
-      recommendation: 'emergency_sell',
+      reasoning: `CRITICAL SENSOR ALERT: Cooling compressor failure detected. Temperature spiked to ${failedTelemetry.temperature}°C. Immediate price alert liquidation required to prevent 100% cargo loss.`,
+      recommendation: 'direct_sell',
       suggestedMarket: nearestMarket,
       estimatedRecoveryPercent: 75,
       estimatedRecoveryValue: Math.round(selectedCargo.estimatedCargoValue * 0.75),
@@ -999,7 +999,7 @@ function FleetTrackingView() {
     
     // WhatsApp Mock Trigger
     window.dispatchEvent(new CustomEvent('whatsapp-alert', { 
-      detail: { message: `🚨 URGENT: Cooling failure on ${selectedCargo.truckPlate}. AI has auto-listed the cargo on the emergency marketplace.` }
+      detail: { message: `🚨 URGENT: Cooling failure on ${selectedCargo.truckPlate}. AI has auto-listed the cargo on the price alert marketplace.` }
     }));
   }, [dispatch, selectedCargo]);
 
@@ -1013,12 +1013,12 @@ function FleetTrackingView() {
     if (acceptedBid) {
       setActiveMapBid(acceptedBid);
       
-      // Request Driver's Real-Time GPS Location
+      // Request Farmer's Real-Time GPS Location
       if ("geolocation" in navigator) {
-        setLocationStatus("Detecting truck GPS coordinates...");
+        setLocationStatus("Detecting delivery GPS coordinates...");
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setDriverLocation(`${position.coords.latitude},${position.coords.longitude}`);
+            setFarmerLocation(`${position.coords.latitude},${position.coords.longitude}`);
             setLocationStatus("Live GPS Locked ✅");
           },
           (error) => {
@@ -1038,7 +1038,7 @@ function FleetTrackingView() {
         id: `notif-accept-${Date.now()}`,
         type: "bid_accepted",
         title: "✅ Bid Accepted",
-        message: `Truck is being rerouted. Updated ETA sent to wholesaler.`,
+        message: `Delivery is being rerouted. Updated ETA sent to wholesaler.`,
         timestamp: Date.now(),
         read: false,
       },
@@ -1119,7 +1119,7 @@ function FleetTrackingView() {
                 className={`w-full cursor-pointer flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-[#007AFF] to-[#34C759] text-white font-bold rounded-xl shadow-lg ${isScanning ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-                Driver: Upload Photo for Quality Cert
+                Farmer: Upload Photo for Quality Cert
                 <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -1164,7 +1164,7 @@ function FleetTrackingView() {
             <p className="text-xs text-[var(--text-tertiary)] mb-4 relative z-10">Cold chain failure detected. Deploy backup refrigeration unit to preserve cargo.</p>
             <button 
               onClick={() => {
-                dispatch({ type: "ADD_NOTIFICATION", notification: { id: `sos-${Date.now()}`, type: "system", title: "🚨 SOS Dispatched", message: "Backup refrigeration unit deployed to truck location. ETA: 12 min.", timestamp: Date.now(), read: false } });
+                dispatch({ type: "ADD_NOTIFICATION", notification: { id: `sos-${Date.now()}`, type: "system", title: "🚨 SOS Dispatched", message: "Backup refrigeration unit deployed to delivery location. ETA: 12 min.", timestamp: Date.now(), read: false } });
               }}
               className="w-full skeuomorphic-btn skeuomorphic-danger py-3 px-6 text-sm font-bold uppercase tracking-wider relative z-10 flex items-center justify-center gap-2"
             >
@@ -1317,7 +1317,7 @@ function FleetTrackingView() {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full min-h-[500px]">
         <div className="w-8 h-8 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-[var(--text-secondary)]">Initializing Fleet Data...</p>
+        <p className="text-[var(--text-secondary)]">Initializing Active Deliveries Data...</p>
       </div>
     );
   }
@@ -1413,7 +1413,7 @@ function FleetTrackingView() {
         </div>
       </header>
 
-      {/* Fleet Dashboard Filters */}
+      {/* Active Deliveries Dashboard Filters */}
       <div className="ios-card glass p-4 mb-6 relative z-10 flex flex-wrap gap-4 items-center">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase">Cargo Type</label>
@@ -1450,8 +1450,8 @@ function FleetTrackingView() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase">Driver / Truck</label>
-          <input type="text" placeholder="Search..." value={filterDriverName} onChange={(e) => setFilterDriverName(e.target.value)} className="bg-white/5 border border-[var(--separator)] rounded-lg px-3 py-1.5 text-sm" />
+          <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase">Farmer / Delivery</label>
+          <input type="text" placeholder="Search..." value={filterFarmerName} onChange={(e) => setFilterFarmerName(e.target.value)} className="bg-white/5 border border-[var(--separator)] rounded-lg px-3 py-1.5 text-sm" />
         </div>
 
         <div className="flex flex-col gap-1">
@@ -1495,7 +1495,7 @@ function FleetTrackingView() {
                   routePoints={selectedCargo.routePolyline || []}
                   status={selectedCargo.status}
                   reroute={selectedCargo.selectedMarket && selectedCargo.status === "rerouting" ? { name: selectedCargo.selectedMarket.name, location: selectedCargo.selectedMarket.location } : null}
-                  otherTrucks={iotCargos.filter((c: any) => c.id !== selectedCargo.id)}
+                  otherDeliverys={iotCargos.filter((c: any) => c.id !== selectedCargo.id)}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-[var(--text-tertiary)] text-xs bg-[var(--bg-primary)]">
@@ -1522,12 +1522,12 @@ function FleetTrackingView() {
             )}
           </div>
 
-          {/* Active Fleet List & Predictive Maintenance */}
+          {/* Active Deliveries List & Predictive Maintenance */}
           <div className="md:flex-1 flex gap-6 md:min-h-0 md:overflow-hidden">
             {/* Active Consignments List */}
             <div className="flex-1 md:overflow-y-auto pr-2 pb-[160px] md:pb-4">
               <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-widest mb-4 flex items-center gap-2">
-                <NavIcon icon="truck" className="w-4 h-4 text-[var(--text-tertiary)]" /> Active Consignments
+                <NavIcon icon="delivery" className="w-4 h-4 text-[var(--text-tertiary)]" /> Active Consignments
               </h3>
               <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
                 {filteredCargos.map((cargo) => (
@@ -1596,17 +1596,17 @@ function FleetTrackingView() {
                 ))}
               </div>
             </div>
-            {/* Feature 8: Predictive Fleet Maintenance AI */}
+            {/* Feature 8: Predictive Active Deliveries Maintenance AI */}
             <div className="h-fit w-[300px] shrink-0 hidden lg:flex flex-col ios-card clay overflow-hidden">
               <div className="p-4 border-b border-[var(--separator)] bg-[#AF52DE]/5">
                 <h3 className="text-xs font-bold text-[#AF52DE] uppercase tracking-widest flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.83M11.42 15.17l2.492-3.053c.203-.25.476-.432.793-.52l.983-.272M11.42 15.17l-3.053 2.492c-.25.203-.432.476-.52-.793l-.272.983M15.17 11.42l-2.492 3.053c-.203.25-.476.432-.793.52l-.983.272M15.17 11.42l3.053-2.492c.25-.203.432-.476.52-.793l.272-.983" /></svg>
-                  Fleet Health AI <span className="animate-pulse ml-1 w-1.5 h-1.5 rounded-full bg-[#AF52DE] inline-block"></span>
+                  Active Deliveries Health AI <span className="animate-pulse ml-1 w-1.5 h-1.5 rounded-full bg-[#AF52DE] inline-block"></span>
                 </h3>
               </div>
               <div className="p-4 space-y-4 overflow-y-auto max-h-[350px]">
                 {filteredCargos.length === 0 ? (
-                  <p className="text-xs text-[var(--text-tertiary)] italic">No active fleets to monitor.</p>
+                  <p className="text-xs text-[var(--text-tertiary)] italic">No active logisticss to monitor.</p>
                 ) : (
                   filteredCargos.map((cargo, idx) => {
                     // Calculate dynamic risk based on temperature and status
@@ -1666,7 +1666,7 @@ function FleetTrackingView() {
             
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 block">Truck Plate Number</label>
+                <label className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-1 block">Delivery Plate Number</label>
                 <input type="text" value={newPlate} onChange={(e) => setNewPlate(e.target.value)} className="ios-input font-[family-name:var(--font-mono)] text-sm" />
               </div>
               <div className="grid grid-cols-1 gap-4">
@@ -1725,7 +1725,7 @@ function FleetTrackingView() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">Push to Marketplace</h2>
-            <p className="text-sm text-[var(--text-tertiary)] mb-6">Instantly broadcast this cargo to nearby wholesalers for emergency liquidation.</p>
+            <p className="text-sm text-[var(--text-tertiary)] mb-6">Instantly broadcast this cargo to nearby wholesalers for price alert liquidation.</p>
             
             <div className="space-y-4">
               <div>
@@ -1760,9 +1760,9 @@ function FleetTrackingView() {
             </button>
             <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse-dot" />
-              Rerouting Driver
+              Rerouting Farmer
             </h2>
-            <p className="text-sm text-[var(--text-tertiary)] mb-2">Live navigation instructions transmitted to Truck {selectedCargo?.truckPlate || "Unknown"}. Destination: {activeMapBid.wholesalerLocation}</p>
+            <p className="text-sm text-[var(--text-tertiary)] mb-2">Live navigation instructions transmitted to Delivery {selectedCargo?.truckPlate || "Unknown"}. Destination: {activeMapBid.wholesalerLocation}</p>
             <p className="text-xs font-bold text-[#34C759] mb-6 bg-[#34C759]/10 inline-block px-3 py-1.5 rounded-full border border-[#34C759]/20">
               {locationStatus || "Initializing GPS tracking module..."}
             </p>
@@ -1771,7 +1771,7 @@ function FleetTrackingView() {
               <iframe 
                 width="100%" 
                 height="100%" 
-                src={`https://maps.google.com/maps?${driverLocation ? `saddr=${driverLocation}&daddr=${encodeURIComponent(activeMapBid.wholesalerLocation)}` : `q=${encodeURIComponent(activeMapBid.wholesalerLocation)}`}&t=&z=10&ie=UTF8&iwloc=&output=embed`} 
+                src={`https://maps.google.com/maps?${farmerLocation ? `saddr=${farmerLocation}&daddr=${encodeURIComponent(activeMapBid.wholesalerLocation)}` : `q=${encodeURIComponent(activeMapBid.wholesalerLocation)}`}&t=&z=10&ie=UTF8&iwloc=&output=embed`} 
                 frameBorder="0" 
                 scrolling="no" 
                 marginHeight={0} 
@@ -1780,18 +1780,18 @@ function FleetTrackingView() {
             </div>
             <div className="flex gap-4">
               <a 
-                href={`https://www.google.com/maps/dir/?api=1${driverLocation ? `&origin=${driverLocation}` : ''}&destination=${encodeURIComponent(activeMapBid.wholesalerLocation)}&travelmode=driving`}
+                href={`https://www.google.com/maps/dir/?api=1${farmerLocation ? `&origin=${farmerLocation}` : ''}&destination=${encodeURIComponent(activeMapBid.wholesalerLocation)}&travelmode=driving`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full btn btn-success py-3 text-center flex items-center justify-center gap-2 font-bold"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
-                Launch Truck Navigation
+                Launch Delivery Navigation
               </a>
               <button 
                 onClick={() => {
                   setActiveMapBid(null);
-                  setDriverLocation(null);
+                  setFarmerLocation(null);
                   setLocationStatus("");
                 }}
                 className="w-full btn btn-ghost py-3 font-semibold"
@@ -1850,7 +1850,7 @@ function AlertsView() {
                 notif.type === 'system' ? 'bg-[#FF3B30]' :
                 notif.type === 'new_cargo' ? 'bg-[#007AFF]' : 'bg-[#34C759]'
               }`}>
-                <NavIcon icon={notif.type === 'system' ? 'shield' : notif.type === 'new_cargo' ? 'truck' : 'store'} className="w-4 h-4 text-white" />
+                <NavIcon icon={notif.type === 'system' ? 'shield' : notif.type === 'new_cargo' ? 'delivery' : 'store'} className="w-4 h-4 text-white" />
               </div>
               
               {/* Card */}

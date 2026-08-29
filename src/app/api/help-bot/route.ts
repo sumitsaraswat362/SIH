@@ -5,10 +5,11 @@ export async function POST(req: Request) {
   try {
     const { message, history } = await req.json();
 
-    const systemPrompt = `You are the Annapurna AI Assistant, helping users navigate the agricultural marketplace platform.
-Explain what each page does (Produce Tracking, Farmer-Buyer Marketplace, Analytics, Nerve Center)
-Explain key concepts (freshness degradation, AI matchmaking, direct farmer-to-buyer sales, bidding)
-Be concise and friendly
+    const systemPrompt = `You are the Annapurna AI Assistant, an agricultural marketplace assistant.
+Help farmers list produce, understand pricing, and track deals.
+Help buyers find verified farm-fresh produce.
+Explain how Annapurna eliminates middlemen and saves farmer earnings by removing commission agent cuts.
+Be concise and friendly.
 If user asks about navigation, suggest the correct page.`;
 
     const formattedHistory = history

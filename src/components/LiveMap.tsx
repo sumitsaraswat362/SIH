@@ -46,8 +46,8 @@ export default function LiveMap({
 
           // Use OpenStreetMap tiles (fastest, most reliable)
           L.tileLayer(
-            "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-            { maxZoom: 18 }
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            { maxZoom: 18, className: 'map-tiles' }
           ).addTo(map);
         }
 
@@ -188,8 +188,9 @@ export default function LiveMap({
         .lm-tip::before{display:none!important}
         .lm-tip-red{background:rgba(255,59,48,.9)!important;border:1px solid rgba(255,255,255,.3)!important;color:#fff!important;font:bold 10px ui-monospace,monospace!important;padding:3px 8px!important;border-radius:6px!important}
         .lm-tip-red::before{display:none!important}
+        .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
       `}</style>
-      <div ref={mapRef} className="w-full h-full rounded-xl" />
+      <div ref={mapRef} className="w-full h-full rounded-xl bg-[#000]" />
     </div>
   );
 }

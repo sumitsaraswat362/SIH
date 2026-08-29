@@ -20,9 +20,9 @@ const forecastData = [
 ];
 
 const esgMetrics = [
-  { title: "Total Food Saved (Kg)", value: "24,500", icon: <Leaf className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />, trend: "+12%", desc: "vs last month" },
-  { title: "Economic Value Recovered for Farmers (₹)", value: "1.24M", icon: <IndianRupee className="w-6 h-6 text-blue-600 dark:text-blue-400" />, trend: "+8%", desc: "in direct benefits" },
-  { title: "CO2 Emissions Prevented", value: "4,200 Kg", icon: <CloudOff className="w-6 h-6 text-purple-600 dark:text-purple-400" />, trend: "+15%", desc: "carbon offset" },
+  { title: "Middlemen Bypassed", value: "2,450", icon: <Leaf className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />, trend: "+12%", desc: "vs last month" },
+  { title: "Total Farmer Earnings Increase", value: "1.24M", icon: <IndianRupee className="w-6 h-6 text-blue-600 dark:text-blue-400" />, trend: "+8%", desc: "in direct benefits" },
+  { title: "Average Price Premium via AI", value: "15%", icon: <CloudOff className="w-6 h-6 text-purple-600 dark:text-purple-400" />, trend: "+15%", desc: "carbon offset" },
 ];
 
 export default function AnalyticsDashboard() {
@@ -276,11 +276,11 @@ export default function AnalyticsDashboard() {
                       <Database className="w-12 h-12 mx-auto mb-3 opacity-20 text-blue-400" />
                       <p>Ask a natural language question. The AI will generate SQL and query the data warehouse directly.</p>
                       <div className="mt-4 flex flex-col gap-2">
-                        <button onClick={() => submitQuery("Which trucks spoiled this week?")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
-                          "Which trucks spoiled this week?"
+                        <button onClick={() => submitQuery("Which farmers sold produce this week?")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
+                          "Which farmers sold produce this week?"
                         </button>
-                        <button onClick={() => submitQuery("Show me the coldest trucks")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
-                          "Show me the coldest trucks"
+                        <button onClick={() => submitQuery("Show me the highest earning farmers")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
+                          "Show me the highest earning farmers"
                         </button>
                       </div>
                     </div>
@@ -385,13 +385,13 @@ export default function AnalyticsDashboard() {
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart data={lastAssistantMessage.data}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-[var(--separator)]" />
-                                <XAxis dataKey="truck_id" stroke="currentColor" className="text-[var(--text-tertiary)]" fontSize={12} />
+                                <XAxis dataKey="farmer_id" stroke="currentColor" className="text-[var(--text-tertiary)]" fontSize={12} />
                                 <YAxis stroke="currentColor" className="text-[var(--text-tertiary)]" fontSize={12} />
                                 <Tooltip 
                                   contentStyle={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--separator)', borderRadius: '8px' }}
                                   itemStyle={{ color: 'var(--text-primary)' }}
                                 />
-                                <Bar dataKey="max_temp_celsius" fill="#818cf8" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="sale_price" fill="#818cf8" radius={[4, 4, 0, 0]} />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
@@ -406,13 +406,13 @@ export default function AnalyticsDashboard() {
                             {lastAssistantMessage.data.map((row: any, i: number) => (
                               <div key={i} className="bg-white/5 border border-[var(--separator)] rounded-xl p-4 hover:bg-white/10 transition-colors">
                                 <div className="flex justify-between items-center mb-2">
-                                  <span className="font-mono text-sm font-bold text-[var(--text-primary)]">{row.truck_id}</span>
-                                  <span className={`text-xs px-2 py-1 rounded-full ${row.status === 'Spoiled' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'}`}>
+                                  <span className="font-mono text-sm font-bold text-[var(--text-primary)]">{row.farmer_id}</span>
+                                  <span className={`text-xs px-2 py-1 rounded-full ${row.status === 'Disputed' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'}`}>
                                     {row.status}
                                   </span>
                                 </div>
                                 <div className="flex justify-between text-sm text-[var(--text-secondary)]">
-                                  <span>Temp: <span className="text-[var(--text-primary)]">{row.max_temp_celsius}°C</span></span>
+                                  <span>Price: <span className="text-[var(--text-primary)]">{row.sale_price}₹/kg</span></span>
                                   <span>Loc: <span className="text-[var(--text-primary)]">{row.last_location}</span></span>
                                 </div>
                               </div>
@@ -462,9 +462,9 @@ export default function AnalyticsDashboard() {
                     <div className="bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-xl p-4 mb-6 flex items-start gap-4 backdrop-blur-md">
                       <Activity className="w-6 h-6 mt-0.5 shrink-0 text-blue-400" />
                       <div>
-                        <p className="text-sm font-semibold mb-1">14-Day Spoilage Risk Projection</p>
+                        <p className="text-sm font-semibold mb-1">14-Day Market Volatility Projection</p>
                         <p className="text-xs opacity-80">
-                          Forecasting generated via our ML forecasting engine. Data indicates a projected risk spike around Day 10. Recommend proactive rerouting of fleet assets to mitigate potential losses.
+                          Forecasting generated via our ML forecasting engine. Data indicates a projected price dip around Day 10. Recommend proactive matching of farmers with direct buyers to mitigate potential losses.
                         </p>
                       </div>
                     </div>
@@ -554,8 +554,8 @@ export default function AnalyticsDashboard() {
                     <button onClick={() => submitLegalQuery("What are the FSSAI compliance rules?")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
                       "What are the FSSAI compliance rules?"
                     </button>
-                    <button onClick={() => submitLegalQuery("TRK-007 spoiled, who pays?")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
-                      "TRK-007 spoiled, who pays?"
+                    <button onClick={() => submitLegalQuery("LST-007 disputed, what is the resolution?")} className="text-xs bg-[var(--fill-secondary)] hover:bg-[var(--fill-tertiary)] text-[var(--text-primary)] border border-[var(--separator)] px-3 py-2 rounded-lg text-left transition-colors">
+                      "LST-007 disputed, what is the resolution?"
                     </button>
                   </div>
                 </div>

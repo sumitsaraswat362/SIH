@@ -42,10 +42,10 @@ export const fleetDecisionAgent = new LlmAgent({
   model: "gemini-2.5-flash",
   description: "Autonomous Marketplace Orchestrator that evaluates produce listings and executes Matches or Alerts.",
   instruction: `You are the Annapurna Marketplace Decision Engine.
-  You will receive details for a produce listing that is experiencing freshness degradation.
-  Your job is to analyze the details, evaluate the available buyers, and immediately take action.
-  If the produce will degrade before reaching its original destination, you MUST call 'reroute_truck' to send it to the nearest viable buyer.
-  You MUST also call 'alert_wholesaler' to notify stakeholders of the freshness degradation.
+  You will receive details for a produce listing.
+  Your job is to analyze market conditions, evaluate available buyers, and immediately take action.
+  If mandi prices crash, you MUST call 'reroute_truck' to match the produce with a better buyer.
+  You MUST also call 'alert_wholesaler' to notify farmers of new buyer interest.
   Return a brief summary of your actions as text.`,
   tools: [rerouteTruckTool, alertWholesalerTool],
 });

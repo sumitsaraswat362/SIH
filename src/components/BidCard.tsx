@@ -51,10 +51,10 @@ export default function BidCard({ bid, onAccept, onReject, onCounter, onViewMap,
         <div className="flex items-center gap-3">
           {/* Avatar */}
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#007AFF]/20 to-[#AF52DE]/20 border border-[var(--separator)] flex items-center justify-center text-sm font-bold text-[#007AFF] shadow-sm">
-            {(bid.wholesalerName || "W").charAt(0)}
+            {(bid.wholesalerName || "V").charAt(0)}
           </div>
           <div>
-            <p className="text-sm font-bold text-[var(--text-primary)]">{bid.wholesalerName || "Wholesaler"}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)]">{bid.wholesalerName || "Verified Buyer"}</p>
             <p className="text-xs font-medium text-[var(--text-secondary)] mt-0.5">
               {bid.distanceKm} km · {bid.etaMinutes} min away
             </p>
@@ -90,8 +90,9 @@ export default function BidCard({ bid, onAccept, onReject, onCounter, onViewMap,
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="clay text-center p-3">
           <p className="text-[9px] text-[var(--text-tertiary)] uppercase tracking-widest font-bold">Price/kg</p>
-          <p className="font-[family-name:var(--font-mono)] text-xl font-bold text-[#34C759] mt-1 drop-shadow-sm">
+          <p className="font-[family-name:var(--font-mono)] text-xl font-bold text-[#34C759] mt-1 drop-shadow-sm flex flex-col items-center">
             ₹{bid.offeredPricePerKg}
+            <span className="text-[8px] text-[#34C759] uppercase mt-1">Commission Agent Bypassed ✓</span>
           </p>
         </div>
         <div className="clay text-center p-3">
@@ -152,7 +153,7 @@ export default function BidCard({ bid, onAccept, onReject, onCounter, onViewMap,
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>
-            Accept
+            Accept & Save 30%
           </button>
           <button
             onClick={() => setShowCounter(!showCounter)}

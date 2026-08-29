@@ -18,12 +18,12 @@ export default function AIDecisionCard({ decision }: AIDecisionCardProps) {
           </div>
           <div>
             <h3 className="ios-headline text-[#000000]">AI Agent</h3>
-            <p className="ios-caption">Monitoring cargo telemetry...</p>
+            <p className="ios-caption">Monitoring market prices & buyers...</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-[13px] text-[#8E8E93]">
           <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-pulse-dot" />
-          Analyzing temperature trends, traffic, and market availability
+          Analyzing market prices, farm fresh limits, and direct buyers
         </div>
       </div>
     );
@@ -53,8 +53,8 @@ export default function AIDecisionCard({ decision }: AIDecisionCardProps) {
           decision.recommendation === "continue" ? "badge-safe" :
           decision.recommendation === "reroute" ? "badge-danger" : "badge-warning"
         }`}>
-          {decision.recommendation === "continue" ? "Continue" :
-           decision.recommendation === "reroute" ? "⚡ Reroute" : "🚨 Emergency Sell"}
+          {decision.recommendation === "continue" ? "Maintain Listing" :
+           decision.recommendation === "reroute" ? "⚡ Match Buyer" : "🚨 Direct Sell"}
         </span>
       </div>
 
@@ -66,7 +66,7 @@ export default function AIDecisionCard({ decision }: AIDecisionCardProps) {
       {/* Recovery Stats */}
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-[#F2F2F7] p-3 rounded-lg text-center">
-          <p className="ios-caption uppercase tracking-wider mb-1">Recovery</p>
+          <p className="ios-caption uppercase tracking-wider mb-1 text-[10px]">Farmer Profit Margin</p>
           <p className={`font-[family-name:var(--font-mono)] text-xl font-bold ${
             decision.estimatedRecoveryPercent >= 80 ? "text-[#34C759]" :
             decision.estimatedRecoveryPercent >= 60 ? "text-[#FF9500]" : "text-[#FF3B30]"
@@ -75,7 +75,7 @@ export default function AIDecisionCard({ decision }: AIDecisionCardProps) {
           </p>
         </div>
         <div className="bg-[#F2F2F7] p-3 rounded-lg text-center">
-          <p className="ios-caption uppercase tracking-wider mb-1">Value</p>
+          <p className="ios-caption uppercase tracking-wider mb-1 text-[10px]">Estimated Farmer Earnings</p>
           <p className="font-[family-name:var(--font-mono)] text-xl font-bold text-[#34C759]">
             ₹{decision.estimatedRecoveryValue.toLocaleString("en-IN")}
           </p>
@@ -87,10 +87,10 @@ export default function AIDecisionCard({ decision }: AIDecisionCardProps) {
         <div className="bg-[#FF9500]/10 rounded-lg p-3 mb-3">
           <div className="flex items-center gap-2 mb-1">
             <svg className="w-4 h-4 text-[#FF9500]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0 1 18 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25" /></svg>
-            <span className="text-[13px] font-bold text-[#C93400]">Gati Shakti Multi-Modal Route</span>
+            <span className="text-[13px] font-bold text-[#C93400]">Direct Farm-to-Retail Connect</span>
           </div>
           <p className="text-[12px] text-[#C93400]/80 leading-relaxed">
-            Alternative: Transfer to Indian Railways Cold Chain (Train 12951). ETA: 4 Hours.
+            Alternative: Direct connect to local retail chain. Bypassing 3 middlemen.
           </p>
         </div>
       )}

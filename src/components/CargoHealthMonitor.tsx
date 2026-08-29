@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-interface CargoHealthMonitorProps {
+interface ProduceHealthMonitorProps {
   temperature: number;
   humidity: number;
   ethyleneLevel: "low" | "medium" | "high";
@@ -10,13 +10,13 @@ interface CargoHealthMonitorProps {
   spoilageMinutes: number | null;
 }
 
-export default function CargoHealthMonitor({
+export default function ProduceHealthMonitor({
   temperature,
   humidity,
   ethyleneLevel,
   safeMax,
   spoilageMinutes,
-}: CargoHealthMonitorProps) {
+}: ProduceHealthMonitorProps) {
   const status = useMemo(() => {
     if (temperature <= safeMax - 2) return "safe";
     if (temperature <= safeMax) return "warning";
@@ -41,7 +41,7 @@ export default function CargoHealthMonitor({
     <div className={`ios-card p-5 ${status === "danger" ? "border border-[#FF3B30]/30" : ""}`}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-[#3C3C43] uppercase tracking-wider">
-          Cargo Health Monitor
+          Produce Quality & Freshness
         </h3>
         <span
           className={`badge ${
@@ -52,7 +52,7 @@ export default function CargoHealthMonitor({
               : "badge-danger"
           }`}
         >
-          {status === "safe" ? "● Nominal" : status === "warning" ? "● Caution" : "● Critical"}
+          {status === "safe" ? "● PREMIUM QUALITY" : status === "warning" ? "● PRICE DROPPING" : "● SELL NOW"}
         </span>
       </div>
 
@@ -97,10 +97,10 @@ export default function CargoHealthMonitor({
                   : "text-[#FF3B30]"
               } ${status === "danger" ? "animate-pulse-danger" : ""}`}
             >
-              {(temperature || 0).toFixed(1)}°
+              {temperature < 10 ? "95%" : temperature < 20 ? "80%" : temperature < 30 ? "60%" : "40%"}
             </span>
             <span className="text-xs text-[#8E8E93] mt-0.5">
-              Safe: ≤{safeMax}°C
+              Freshness Score
             </span>
           </div>
         </div>
@@ -109,15 +109,15 @@ export default function CargoHealthMonitor({
       {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="bg-[#F2F2F7] rounded-lg p-3 text-center">
-          <p className="text-[10px] text-[#8E8E93] uppercase tracking-widest mb-1">Humidity</p>
+          <p className="text-[10px] text-[#8E8E93] uppercase tracking-widest mb-1">Moisture Level</p>
           <p className="font-[family-name:var(--font-mono)] text-lg font-semibold text-[#000000]">
             {humidity}%
           </p>
         </div>
         <div className="bg-[#F2F2F7] rounded-lg p-3 text-center">
-          <p className="text-[10px] text-[#8E8E93] uppercase tracking-widest mb-1">Ethylene</p>
+          <p className="text-[10px] text-[#8E8E93] uppercase tracking-widest mb-1">Ripeness Stage</p>
           <p
-            className={`font-[family-name:var(--font-mono)] text-lg font-semibold ${
+            className={`font-[family-name:var(--font-mono)] text-[11px] font-semibold flex items-center justify-center h-[28px] ${
               ethyleneLevel === "high"
                 ? "text-[#FF3B30]"
                 : ethyleneLevel === "medium"
@@ -125,7 +125,7 @@ export default function CargoHealthMonitor({
                 : "text-[#34C759]"
             }`}
           >
-            {(ethyleneLevel || "normal").toUpperCase()}
+            {ethyleneLevel === "high" ? "SELL IMMEDIATELY" : ethyleneLevel === "medium" ? "READY TO SHIP" : "FARM FRESH"}
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function CargoHealthMonitor({
           </div>
           
           <p className="text-[10px] text-[#FF3B30]/70 uppercase tracking-widest text-center mb-1 mt-2">
-            Estimated Time to Spoilage
+            Freshness Window Remaining
           </p>
           <p
             className={`font-[family-name:var(--font-mono)] text-2xl font-bold text-center ${

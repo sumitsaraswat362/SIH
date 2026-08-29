@@ -1,6 +1,8 @@
 // ============================================================
 // ANNAPURNA — Core Type Definitions
 // ============================================================
+// ProduceListing is the core entity — aliased from Cargo for SIH26033 context
+export type ProduceListing = Cargo;
 
 export interface CarbonToken {
   hash: string;
@@ -26,7 +28,11 @@ export type CargoStatus =
   | "emergency"       // AI triggered Emergency Liquidation Mode
   | "rerouting"       // Bid accepted, heading to new buyer
   | "delivered"       // Successfully delivered
-  | "spoiled";        // Too late — cargo lost
+  | "spoiled"         // Too late — cargo lost
+  | "listed"          // Added for SIH26033
+  | "negotiating"     // Added for SIH26033
+  | "sold"            // Added for SIH26033
+  | "harvested";      // Added for SIH26033
 
 export interface TelemetryData {
   temperature: number;       // °C — safe threshold varies by cargo
@@ -69,6 +75,15 @@ export interface Cargo {
   
   // Timestamps
   createdAt?: string | number;          // From Supabase or local
+  
+  // SIH26033 Additional Fields
+  farmerName?: string;
+  farmerPhone?: string;
+  minimumAcceptablePrice?: number;
+  mandiPricePerKg?: number;
+  harvestDate?: number;
+  freshnessScore?: number; // 0-100
+  middlemanCommissionSaved?: number;
 }
 
 // --- Markets ---
@@ -80,6 +95,7 @@ export interface Market {
   distanceKm: number;
   etaMinutes: number;
   type: "wholesale_market" | "mandi" | "cold_storage" | "retail";
+  mandiPricePerKg?: number; // SIH26033 Additional Field
 }
 
 // --- Bids (Wholesaler → Driver) ---

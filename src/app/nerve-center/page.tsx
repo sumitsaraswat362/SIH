@@ -80,9 +80,9 @@ const AgentControlCenter = () => {
         ) {
           if (newLog.type === 'action' || messageLower.includes('reroute') || messageLower.includes('alert')) {
             const newEmail = {
-              to: 'logistics.wholesaler@example.com',
+              to: 'buyer.alerts@example.com',
               subject: `Automated Marketplace Alert: Action Required`,
-              body: `Our autonomous marketplace monitoring system has detected an event: "${newLog.message}". A reroute or alternative action has been initiated to preserve produce integrity.`,
+              body: `Our autonomous marketplace monitoring system has detected an event: "${newLog.message}". A reroute or alternative action has been initiated to secure optimal farmer pricing.`,
               time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
             };
             setEmails(prev => [newEmail, ...prev]);
@@ -275,7 +275,7 @@ const AgentControlCenter = () => {
               <div className="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-2">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm">
                   <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse shrink-0" />
-                  <span className="text-red-400 truncate">Emergency Reroute (TRK-007)</span>
+                  <span className="text-red-400 truncate">Emergency Reroute (LST-007)</span>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-sm">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] shrink-0" />
@@ -313,7 +313,7 @@ const AgentControlCenter = () => {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
-                        to: 'logistics.wholesaler@example.com',
+                        to: 'buyer.alerts@example.com',
                         subject: 'Test Alert from Nerve Center',
                         body: 'This is a test alert verifying the email integration.'
                       })

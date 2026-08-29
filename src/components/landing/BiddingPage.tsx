@@ -19,7 +19,7 @@ export function BiddingPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(99,102,241,0.15)]"
         >
           <Network className="w-4 h-4" />
-          <span>DecisionAgent Active</span>
+          <span>AI Matching Active</span>
         </motion.div>
         <motion.h1 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -27,7 +27,7 @@ export function BiddingPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-6xl md:text-8xl font-extrabold tracking-tighter text-white mb-6 drop-shadow-sm relative z-10"
         >
-          The Market,<br />
+          Farmer Markets,<br />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
             Automated.
           </span>
@@ -101,7 +101,7 @@ export function BiddingPage() {
                     <div className="flex items-center gap-3 mb-4">
                       <span className="bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1">
                         <Zap className="w-3 h-3" />
-                        Spot Load
+                        Farm Produce
                       </span>
                       <span className="text-gray-400 font-medium text-sm">{bid.weight}</span>
                     </div>

@@ -34,7 +34,7 @@ export default function NegotiationPit() {
       const res = await fetch('/api/negotiation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario: '15% rot detected in shipment TRK-007' })
+        body: JSON.stringify({ scenario: 'Price dispute detected for produce listing LST-007' })
       });
       
       if (!res.ok) throw new Error('Failed to fetch negotiation data');
@@ -125,11 +125,11 @@ export default function NegotiationPit() {
                   {isBuyer ? (
                     <>
                       <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                      BuyerAgent (Wholesaler)
+                      BuyerAgent (Buyer)
                     </>
                   ) : (
                     <>
-                      SellerAgent (Fleet)
+                      SellerAgent (Farmer)
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                     </>
                   )}
