@@ -3,21 +3,39 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-type UserRole = "director" | "wholesaler" | null;
+type UserRole = "farmer" | "buyer" | null;
 
 interface AuthUser {
+  id: string;
   name: string;
   role: UserRole;
-  password?: string;
+  phone?: string;
   location?: string;
   city?: string;
   address?: string;
+  state?: string;
+  district?: string;
+  village?: string;
+  buyerType?: "consumer" | "retailer" | "restaurant" | "bulk_buyer";
   coords?: { lat: number; lng: number };
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (name: string, role: UserRole, password?: string, location?: string, city?: string, address?: string, coords?: { lat: number; lng: number }) => Promise<string | null>;
+  login: (data: {
+    name: string;
+    role: UserRole;
+    password?: string;
+    phone?: string;
+    location?: string;
+    city?: string;
+    address?: string;
+    state?: string;
+    district?: string;
+    village?: string;
+    buyerType?: string;
+    coords?: { lat: number; lng: number };
+  }) => Promise<string | null>;
   logout: () => Promise<void>;
 }
 
@@ -29,41 +47,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch the current user session from the server (cookie-based)
     fetch("/api/auth/me")
       .then(res => res.json())
       .then(data => {
         if (data.user) {
-          setUser(data.user);
+          const u = data.user;
+          // Normalize legacy roles
+          if (u.role === "director") u.role = "farmer";
+          if (u.role === "wholesaler") u.role = "buyer";
+          setUser(u);
         }
         setMounted(true);
       })
-      .catch(() => {
-        setMounted(true);
-      });
+      .catch(() => setMounted(true));
   }, []);
 
-  const login = async (name: string, role: UserRole, password?: string, location?: string, city?: string, address?: string, coords?: { lat: number; lng: number }) => {
+  const login = async (data: {
+    name: string;
+    role: UserRole;
+    password?: string;
+    phone?: string;
+    location?: string;
+    city?: string;
+    address?: string;
+    state?: string;
+    district?: string;
+    village?: string;
+    buyerType?: string;
+    coords?: { lat: number; lng: number };
+  }) => {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, role, password, location, city, address, coords })
+        body: JSON.stringify(data),
       });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        return data.error || "Login failed";
-      }
-      
-      setUser(data.user);
-      
-      if (role === "director") router.push("/fleet");
-      if (role === "wholesaler") router.push("/wholesaler");
-      
+
+      const result = await res.json();
+      if (!res.ok) return result.error || "Login failed";
+
+      setUser(result.user);
+
+      if (data.role === "farmer") router.push("/farmer/dashboard");
+      if (data.role === "buyer") router.push("/buyer");
+
       return null;
-    } catch (e) {
+    } catch {
       return "Network error during login";
     }
   };
@@ -85,8 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

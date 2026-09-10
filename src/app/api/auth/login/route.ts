@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import crypto from 'crypto';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'annapurna_hackathon_super_secret');
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, role, password, location, city, address, coords } = body;
+    const { name, role, password, phone, location, city, address, state, district, village, buyerType, coords } = body;
 
     if (!name || !role) {
       return NextResponse.json({ error: 'Name and role are required' }, { status: 400 });
     }
 
-    // In a real app, verify password against DB. Here we accept any valid structured request 
-    // to match the hackathon demo flow, but we secure it on the server using JWT cookies.
-    const user = { name, role, location, city, address, coords };
+    // Generate a deterministic user ID from name+role for demo consistency
+    const id = `${role}-${crypto.createHash('md5').update(name.toLowerCase().trim()).digest('hex').slice(0, 8)}`;
 
-    // Sign JWT token
+    const user = { id, name, role, phone, location, city, address, state, district, village, buyerType, coords };
+
     const token = await new SignJWT(user)
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -24,8 +25,7 @@ export async function POST(req: Request) {
       .sign(JWT_SECRET);
 
     const response = NextResponse.json({ success: true, user });
-    
-    // Set HTTP-only secure cookie
+
     response.cookies.set({
       name: 'annapurna_session',
       value: token,
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24,
     });
 
     return response;

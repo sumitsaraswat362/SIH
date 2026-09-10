@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useAppState } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { ProduceListing, CartItem } from "@/lib/types";
 import { DEMO_LISTINGS } from "@/data/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, MapPin, Leaf, Clock, ShoppingCart, 
   TrendingDown, CheckCircle2, ChevronDown, Filter, 
-  Sparkles, Plus, Minus
+  Sparkles, Plus, Minus, Handshake, CreditCard,
+  MessageSquare, X, ArrowRight
 } from "lucide-react";
 
 const CATEGORIES = ["All", "Vegetables", "Fruits", "Grains", "Pulses", "Spices", "Dairy", "Organic"];
@@ -22,6 +24,7 @@ const SORT_OPTIONS = [
 
 export default function BuyerMarketplace() {
   const { state, dispatch } = useAppState();
+  const { user } = useAuth();
   
   // Use state.listings if available, otherwise fallback to DEMO_LISTINGS
   const activeListings = state.listings.length > 0 ? state.listings : DEMO_LISTINGS;
@@ -32,32 +35,48 @@ export default function BuyerMarketplace() {
   const [isAiSearching, setIsAiSearching] = useState(false);
   const [sortBy, setSortBy] = useState("recommended");
   const [aiFilterSummary, setAiFilterSummary] = useState<string | null>(null);
+  const [maxPriceFilter, setMaxPriceFilter] = useState<number | null>(null);
 
-  // Cart Modal State
+  // Modals State
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [negotiateListing, setNegotiateListing] = useState<{ listing: ProduceListing, qty: number } | null>(null);
 
   // Smart AI Search Handler
   const handleSmartSearch = async () => {
     if (!smartQuery.trim()) return;
     setIsAiSearching(true);
-    
     try {
-      // Simulate API call to /api/filter-ai
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await fetch('/api/filter-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: smartQuery }),
+      });
       
-      // Basic mock parsing for demo purposes
-      const q = smartQuery.toLowerCase();
-      if (q.includes("organic")) setActiveCategory("Organic");
-      else if (q.includes("tomato")) { setActiveCategory("Vegetables"); setSearchQuery("tomato"); }
-      else if (q.includes("fruit")) setActiveCategory("Fruits");
-      else if (q.includes("grain")) setActiveCategory("Grains");
-      
-      setAiFilterSummary(`Smart filtered for: "${smartQuery}"`);
-      setSmartQuery("");
-    } catch (e) {
+      if (res.ok) {
+        const filters = await res.json();
+        if (filters.cropType) setSearchQuery(filters.cropType);
+        if (filters.organic) setActiveCategory('Organic');
+        if (filters.cropCategory) setActiveCategory(filters.cropCategory);
+        if (filters.sortBy) setSortBy(filters.sortBy);
+        if (filters.maxPricePerKg) setMaxPriceFilter(filters.maxPricePerKg);
+        setAiFilterSummary(`Filtered: "${smartQuery}"`);
+      } else {
+        // Fallback for demo if API fails
+        const q = smartQuery.toLowerCase();
+        if (q.includes("organic")) setActiveCategory("Organic");
+        else if (q.includes("tomato")) { setActiveCategory("Vegetables"); setSearchQuery("tomato"); }
+        else if (q.includes("fruit")) setActiveCategory("Fruits");
+        else if (q.includes("grain")) setActiveCategory("Grains");
+        setAiFilterSummary(`Smart filtered for: "${smartQuery}"`);
+      }
+    } catch (e) { 
       console.error(e);
-    } finally {
-      setIsAiSearching(false);
+      // Fallback
+      setAiFilterSummary(`Could not apply AI filter.`);
+    } finally { 
+      setIsAiSearching(false); 
+      setSmartQuery(''); 
     }
   };
 
@@ -83,6 +102,10 @@ export default function BuyerMarketplace() {
       );
     }
 
+    if (maxPriceFilter) {
+      result = result.filter(l => l.askingPricePerKg <= maxPriceFilter);
+    }
+
     switch (sortBy) {
       case "price_low":
         result.sort((a, b) => a.askingPricePerKg - b.askingPricePerKg);
@@ -94,13 +117,12 @@ export default function BuyerMarketplace() {
         result.sort((a, b) => b.harvestDate - a.harvestDate); // Newest first
         break;
       default:
-        // recommended could just be freshness or rating (using mock sorting here)
         result.sort((a, b) => (b.freshnessScore || 0) - (a.freshnessScore || 0));
         break;
     }
 
     return result;
-  }, [activeListings, activeCategory, searchQuery, sortBy]);
+  }, [activeListings, activeCategory, searchQuery, sortBy, maxPriceFilter]);
 
   const totalCartItems = state.cart.reduce((acc, item) => acc + 1, 0);
   const totalCartValue = state.cart.reduce((acc, item) => acc + item.subtotal, 0);
@@ -124,7 +146,7 @@ export default function BuyerMarketplace() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative w-11 h-11 rounded-xl bg-white/50 dark:bg-black/50 border border-[var(--separator)] flex items-center justify-center hover:bg-[var(--fill-secondary)] transition-colors backdrop-blur-md"
+              className="relative w-11 h-11 rounded-xl bg-[var(--fill-secondary)] border border-[var(--separator)] flex items-center justify-center hover:bg-[var(--fill-tertiary)] transition-colors backdrop-blur-md"
             >
               <ShoppingCart className="w-5 h-5 text-[var(--text-primary)]" />
               {totalCartItems > 0 && (
@@ -133,17 +155,17 @@ export default function BuyerMarketplace() {
                 </span>
               )}
             </button>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34C759]/20 to-[#5AC8FA]/20 border border-[var(--separator)] flex items-center justify-center shadow-sm">
-              <span className="font-bold text-[#248A3D]">Me</span>
+            <div className="h-11 px-3 rounded-xl bg-gradient-to-br from-[#34C759]/20 to-[#5AC8FA]/20 border border-[var(--separator)] flex items-center justify-center shadow-sm gap-2">
+              <span className="font-bold text-[#248A3D]">{user?.name || "Buyer"}</span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 relative z-10">
-        
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="max-w-7xl mx-auto px-4 md:px-6 pt-6 relative z-10">
         {/* Banner */}
-        <div className="glass liquid-glass bg-gradient-to-r from-[#34C759]/10 to-[#007AFF]/10 border border-[#34C759]/30 rounded-2xl p-4 mb-8 flex items-center justify-between overflow-hidden relative group">
+        <div className="glass liquid-glass rounded-2xl p-4 md:p-6 mb-6 flex flex-col md:flex-row items-center justify-between border border-[var(--separator)] shadow-md overflow-hidden relative">
           <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] z-0"></div>
           <div className="relative z-10 flex-1">
             <h3 className="text-lg md:text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
@@ -188,7 +210,7 @@ export default function BuyerMarketplace() {
             <button
               onClick={handleSmartSearch}
               disabled={isAiSearching || !smartQuery.trim()}
-              className="absolute right-1.5 top-1.5 bottom-1.5 bg-[#007AFF] text-white px-3 rounded-lg text-xs font-bold flex items-center justify-center disabled:opacity-50 transition-opacity"
+              className="absolute right-1.5 top-1.5 bottom-1.5 bg-[#007AFF] text-white px-3 rounded-lg text-xs font-bold flex items-center justify-center disabled:opacity-50 transition-opacity hover:bg-[#005bb5]"
             >
               {isAiSearching ? "Thinking..." : "AI Search"}
             </button>
@@ -201,7 +223,7 @@ export default function BuyerMarketplace() {
               <Sparkles className="w-4 h-4" /> <strong>AI Filter:</strong> {aiFilterSummary}
             </span>
             <button 
-              onClick={() => { setAiFilterSummary(null); setActiveCategory("All"); setSearchQuery(""); }}
+              onClick={() => { setAiFilterSummary(null); setActiveCategory("All"); setSearchQuery(""); setMaxPriceFilter(null); }}
               className="text-xs font-bold opacity-70 hover:opacity-100 ml-2 px-2 py-0.5 rounded hover:bg-black/5"
             >
               Clear
@@ -251,14 +273,18 @@ export default function BuyerMarketplace() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {filteredListings.map((listing) => (
-                <ProduceCard key={listing.id} listing={listing} />
+                <ProduceCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  onNegotiate={(qty) => setNegotiateListing({ listing, qty })}
+                />
               ))}
             </AnimatePresence>
           </div>
         )}
       </main>
 
-      {/* Cart Drawer (Simplified for demo) */}
+      {/* Cart Drawer */}
       <AnimatePresence>
         {isCartOpen && (
           <>
@@ -280,28 +306,29 @@ export default function BuyerMarketplace() {
                 <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" /> Your Cart
                 </h2>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 rounded-full hover:bg-[var(--fill-secondary)]">
-                  ✕
+                <button onClick={() => setIsCartOpen(false)} className="p-2 rounded-full hover:bg-[var(--fill-secondary)] text-[var(--text-primary)]">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {state.cart.length === 0 ? (
-                  <div className="text-center py-10 text-[var(--text-tertiary)]">
+                  <div className="text-center py-10 text-[var(--text-tertiary)] flex flex-col items-center gap-2">
+                    <ShoppingCart className="w-10 h-10 opacity-20" />
                     <p>Your cart is empty.</p>
                   </div>
                 ) : (
                   state.cart.map((item) => (
-                    <div key={item.listingId} className="bg-[var(--fill-secondary)] border border-[var(--separator)] rounded-xl p-3 flex justify-between items-center">
+                    <div key={item.listingId} className="bg-[var(--fill-secondary)] border border-[var(--separator)] rounded-xl p-3 flex justify-between items-center shadow-sm">
                       <div>
                         <p className="font-bold text-[var(--text-primary)] capitalize">{item.listing.cropType}</p>
-                        <p className="text-xs text-[var(--text-secondary)]">{item.quantityKg} kg @ ₹{item.pricePerKg}/kg</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">{item.quantityKg} kg @ ₹{item.pricePerKg}/kg</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-[#34C759]">₹{item.subtotal}</p>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <span className="font-bold text-[var(--text-primary)]">₹{item.subtotal}</span>
                         <button 
                           onClick={() => dispatch({ type: "REMOVE_FROM_CART", listingId: item.listingId })}
-                          className="text-[10px] font-bold text-[#FF3B30] hover:underline mt-1"
+                          className="text-[10px] text-red-500 font-bold bg-red-500/10 px-2 py-1 rounded hover:bg-red-500/20"
                         >
                           Remove
                         </button>
@@ -312,19 +339,19 @@ export default function BuyerMarketplace() {
               </div>
 
               {state.cart.length > 0 && (
-                <div className="p-4 border-t border-[var(--separator)] bg-white/50 dark:bg-black/50">
+                <div className="p-4 border-t border-[var(--separator)] bg-[var(--bg-primary)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                   <div className="flex justify-between items-center mb-4">
                     <span className="font-bold text-[var(--text-secondary)]">Total:</span>
                     <span className="text-2xl font-extrabold text-[#34C759]">₹{totalCartValue}</span>
                   </div>
                   <button 
                     onClick={() => {
-                      alert("Checkout flow would initiate here.");
                       setIsCartOpen(false);
+                      setIsCheckoutOpen(true);
                     }}
-                    className="w-full bg-[#34C759] text-white font-bold py-3 rounded-xl hover:bg-[#2eaf4e] transition-colors shadow-lg"
+                    className="w-full bg-[#34C759] text-white font-bold py-3.5 rounded-xl hover:bg-[#2eaf4e] transition-colors shadow-lg flex items-center justify-center gap-2"
                   >
-                    Proceed to Checkout
+                    Proceed to Checkout <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
@@ -332,12 +359,40 @@ export default function BuyerMarketplace() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Checkout Modal */}
+      <AnimatePresence>
+        {isCheckoutOpen && (
+          <CheckoutModal 
+            onClose={() => setIsCheckoutOpen(false)} 
+            cart={state.cart} 
+            user={user}
+            dispatch={dispatch} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Negotiation Modal */}
+      <AnimatePresence>
+        {negotiateListing && (
+          <NegotiationModal 
+            listing={negotiateListing.listing} 
+            qty={negotiateListing.qty}
+            onClose={() => setNegotiateListing(null)}
+            onAddToCart={(item) => {
+              dispatch({ type: "ADD_TO_CART", item });
+              setNegotiateListing(null);
+              setIsCartOpen(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 // Sub-component for Produce Card
-function ProduceCard({ listing }: { listing: ProduceListing }) {
+function ProduceCard({ listing, onNegotiate }: { listing: ProduceListing, onNegotiate: (qty: number) => void }) {
   const { dispatch } = useAppState();
   const [selectedQty, setSelectedQty] = useState<number>(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -458,39 +513,401 @@ function ProduceCard({ listing }: { listing: ProduceListing }) {
               <button 
                 key={qty}
                 onClick={() => setSelectedQty(qty)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors min-w-[36px] ${
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors min-w-[36px] whitespace-nowrap ${
                   selectedQty === qty 
                     ? "bg-[#34C759] border-[#34C759] text-white" 
                     : "bg-[var(--fill-secondary)] border-[var(--separator)] text-[var(--text-secondary)] hover:bg-[var(--fill-tertiary)]"
                 }`}
               >
-                {qty}k
+                {qty} kg
               </button>
             ))}
           </div>
           
-          {/* Add to Cart Button */}
-          <button 
-            onClick={handleAddToCart}
-            disabled={isAdded}
-            className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              isAdded 
-                ? "bg-[#34C759] text-white shadow-md shadow-[#34C759]/20" 
-                : "bg-black dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-[0.98] shadow-sm"
-            }`}
-          >
-            {isAdded ? (
-              <>
-                <CheckCircle2 className="w-4 h-4" /> Added to Cart
-              </>
-            ) : (
-              <>
-                Add {selectedQty} kg for ₹{selectedQty * askingPrice}
-              </>
-            )}
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button 
+              onClick={() => onNegotiate(selectedQty)}
+              className="flex-[0.4] py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 bg-[var(--fill-secondary)] border border-[var(--separator)] text-[var(--text-secondary)] hover:bg-[var(--fill-tertiary)] hover:text-[var(--text-primary)] transition-all shadow-sm"
+            >
+              <Handshake className="w-4 h-4" /> 
+              <span>Negotiate</span>
+            </button>
+
+            <button 
+              onClick={handleAddToCart}
+              disabled={isAdded}
+              className={`flex-1 py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 transition-all ${
+                isAdded 
+                  ? "bg-[#34C759] text-white shadow-md shadow-[#34C759]/20" 
+                  : "bg-black dark:bg-white text-white dark:text-black hover:opacity-90 active:scale-[0.98] shadow-sm"
+              }`}
+            >
+              {isAdded ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Added
+                </>
+              ) : (
+                <>
+                  Add ₹{selectedQty * askingPrice}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>
+  );
+}
+
+// ----- CHECKOUT MODAL -----
+function CheckoutModal({ onClose, cart, user, dispatch }: { onClose: () => void, cart: CartItem[], user: any, dispatch: any }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("upi");
+
+  const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
+  const platformFee = Math.round(subtotal * 0.02);
+  const deliveryFee = 50; // Mock fixed delivery fee
+  const total = subtotal + platformFee + deliveryFee;
+
+  const address = user?.address || user?.location || "123 Smart Farm Road, Pune, Maharashtra";
+
+  const handlePlaceOrder = async () => {
+    setIsProcessing(true);
+    try {
+      // POSTs to /api/orders for each cart item
+      await Promise.all(cart.map(item => 
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            listingId: item.listingId,
+            farmerId: item.listing.farmerId,
+            buyerId: user?.id || "guest",
+            quantityKg: item.quantityKg,
+            agreedPricePerKg: item.pricePerKg,
+            deliveryMode: "platform_logistics"
+          })
+        })
+      ));
+
+      // In real life we wait for success response
+      setTimeout(() => {
+        dispatch({ type: "CLEAR_CART" });
+        setSuccess(true);
+        setIsProcessing(false);
+      }, 1500);
+    } catch(e) {
+      console.error(e);
+      setIsProcessing(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative glass liquid-glass w-full max-w-md rounded-2xl p-8 text-center shadow-2xl border border-[var(--separator)]"
+        >
+          <div className="w-20 h-20 bg-[#34C759]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-10 h-10 text-[#34C759]" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] mb-2">Order Confirmed!</h2>
+          <p className="text-[var(--text-secondary)] mb-6">Your order #{Math.floor(Math.random()*100000)} has been placed successfully. Fresh produce is on its way!</p>
+          <button 
+            onClick={onClose}
+            className="w-full bg-[#34C759] text-white font-bold py-3.5 rounded-xl hover:bg-[#2eaf4e] transition-colors"
+          >
+            Continue Shopping
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <motion.div 
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 50, opacity: 0 }}
+        className="relative glass liquid-glass w-full max-w-lg rounded-2xl flex flex-col max-h-[90vh] shadow-2xl border border-[var(--separator)] overflow-hidden"
+      >
+        <div className="p-4 border-b border-[var(--separator)] flex items-center justify-between bg-white/50 dark:bg-black/50">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <CreditCard className="w-5 h-5" /> Checkout
+          </h2>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--fill-secondary)] text-[var(--text-primary)]">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+          {/* Items Summary */}
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Order Summary</h3>
+            <div className="space-y-3 bg-[var(--fill-secondary)] p-4 rounded-xl border border-[var(--separator)]">
+              {cart.map((item) => (
+                <div key={item.listingId} className="flex justify-between items-center text-sm">
+                  <span className="text-[var(--text-primary)] font-medium capitalize">
+                    {item.quantityKg}kg {item.listing.cropType}
+                  </span>
+                  <span className="text-[var(--text-secondary)]">₹{item.subtotal}</span>
+                </div>
+              ))}
+              <div className="h-[1px] bg-[var(--separator)] my-2"></div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[var(--text-secondary)]">Subtotal</span>
+                <span className="text-[var(--text-primary)] font-medium">₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[var(--text-secondary)]">Platform Fee (2%)</span>
+                <span className="text-[var(--text-primary)] font-medium">₹{platformFee}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-[var(--text-secondary)]">Delivery Fee</span>
+                <span className="text-[var(--text-primary)] font-medium">₹{deliveryFee}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Address */}
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Delivery Address</h3>
+            <div className="bg-[var(--fill-secondary)] p-4 rounded-xl border border-[var(--separator)] flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-[#007AFF] mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{user?.name || "Buyer"}</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">{address}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Method */}
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Payment Method</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button 
+                onClick={() => setPaymentMethod("upi")}
+                className={`py-3 px-4 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                  paymentMethod === "upi" 
+                    ? "bg-[#007AFF]/10 border-[#007AFF] text-[#007AFF]" 
+                    : "bg-[var(--fill-secondary)] border-[var(--separator)] text-[var(--text-secondary)]"
+                }`}
+              >
+                UPI / Net Banking
+              </button>
+              <button 
+                onClick={() => setPaymentMethod("cod")}
+                className={`py-3 px-4 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                  paymentMethod === "cod" 
+                    ? "bg-[#007AFF]/10 border-[#007AFF] text-[#007AFF]" 
+                    : "bg-[var(--fill-secondary)] border-[var(--separator)] text-[var(--text-secondary)]"
+                }`}
+              >
+                Cash on Delivery
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-[var(--separator)] bg-[var(--bg-primary)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-[var(--text-secondary)] font-medium">Total to Pay</span>
+            <span className="text-3xl font-extrabold text-[var(--text-primary)] leading-none">₹{total}</span>
+          </div>
+          <button 
+            onClick={handlePlaceOrder}
+            disabled={isProcessing}
+            className="w-full bg-[#34C759] text-white font-bold py-3.5 rounded-xl hover:bg-[#2eaf4e] transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {isProcessing ? "Processing..." : `Place Order • ₹${total}`}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+
+// ----- NEGOTIATION MODAL -----
+type NegotiationRoundMsg = { role: "buyer" | "ai" | "system", message: string, price?: number };
+
+function NegotiationModal({ listing, qty, onClose, onAddToCart }: { listing: ProduceListing, qty: number, onClose: () => void, onAddToCart: (item: CartItem) => void }) {
+  const [offerPrice, setOfferPrice] = useState<string>("");
+  const [rounds, setRounds] = useState<NegotiationRoundMsg[]>([
+    { role: "system", message: `Farmer's asking price is ₹${listing.askingPricePerKg}/kg. Minimum acceptable price (MSP/Mandi derived) is strictly protected by AI.` }
+  ]);
+  const [isNegotiating, setIsNegotiating] = useState(false);
+  const [agreedPrice, setAgreedPrice] = useState<number | null>(null);
+
+  const handleOffer = async () => {
+    const numOffer = parseInt(offerPrice);
+    if (isNaN(numOffer) || numOffer <= 0) return;
+
+    const newRounds: NegotiationRoundMsg[] = [...rounds, { role: "buyer", message: `I offer ₹${numOffer}/kg.`, price: numOffer }];
+    setRounds(newRounds);
+    setOfferPrice("");
+    setIsNegotiating(true);
+
+    try {
+      const res = await fetch('/api/negotiation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          listingId: listing.id, 
+          offerPrice: numOffer, 
+          history: newRounds 
+        })
+      });
+
+      let action = "reject";
+      let aiPrice = listing.askingPricePerKg;
+      let aiMessage = "I cannot accept this offer.";
+
+      if (res.ok) {
+        const data = await res.json();
+        action = data.action;
+        aiPrice = data.price;
+        aiMessage = data.message || aiMessage;
+      } else {
+        // Fallback logic if API isn't wired fully
+        await new Promise(r => setTimeout(r, 1000));
+        const mandi = listing.currentMandiPrice;
+        if (numOffer >= listing.askingPricePerKg) {
+          action = "accept";
+          aiPrice = numOffer;
+          aiMessage = "That's a fair price. I accept your offer!";
+        } else if (numOffer >= mandi + (listing.askingPricePerKg - mandi) * 0.5) {
+          action = "counter";
+          aiPrice = Math.floor(listing.askingPricePerKg - 2);
+          aiMessage = `I can lower it a bit to ₹${aiPrice}/kg, but not ₹${numOffer}. It's high quality produce.`;
+        } else {
+          action = "reject";
+          aiMessage = `₹${numOffer} is too low. The mandi price itself is ₹${mandi}. I cannot sell below my cost.`;
+        }
+      }
+
+      setRounds([...newRounds, { role: "ai", message: aiMessage, price: action !== "reject" ? aiPrice : undefined }]);
+
+      if (action === "accept") {
+        setAgreedPrice(aiPrice);
+      } else if (rounds.length >= 9) { // 5 rounds max (buyer+ai * 5 = 10 messages)
+        setRounds(prev => [...prev, { role: "system", message: "Maximum negotiation rounds reached." }]);
+      }
+
+    } catch (e) {
+      console.error(e);
+      setRounds([...newRounds, { role: "system", message: "Negotiation failed. Try again." }]);
+    } finally {
+      setIsNegotiating(false);
+    }
+  };
+
+  const handleAddAgreedToCart = () => {
+    if (!agreedPrice) return;
+    onAddToCart({
+      listingId: listing.id,
+      listing: listing,
+      quantityKg: qty,
+      pricePerKg: agreedPrice,
+      subtotal: agreedPrice * qty,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="relative glass liquid-glass w-full max-w-md rounded-2xl flex flex-col h-[80vh] shadow-2xl border border-[var(--separator)] overflow-hidden"
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-[var(--separator)] flex items-center justify-between bg-gradient-to-r from-[#34C759]/10 to-transparent">
+          <div>
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Handshake className="w-5 h-5 text-[#34C759]" /> AI Negotiation
+            </h2>
+            <p className="text-xs text-[var(--text-secondary)] capitalize mt-1">
+              {qty}kg {listing.cropType} • Farmer: {listing.farmerName}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--fill-secondary)] text-[var(--text-primary)]">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Chat History */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--bg-primary)]/50">
+          {rounds.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'buyer' ? 'justify-end' : msg.role === 'system' ? 'justify-center' : 'justify-start'}`}>
+              {msg.role === 'system' ? (
+                <div className="bg-[var(--fill-secondary)] px-3 py-1.5 rounded-lg text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-bold text-center max-w-[80%] border border-[var(--separator)]">
+                  {msg.message}
+                </div>
+              ) : (
+                <div className={`max-w-[80%] rounded-2xl p-3 text-sm shadow-sm ${
+                  msg.role === 'buyer' 
+                    ? 'bg-[#007AFF] text-white rounded-tr-sm' 
+                    : 'glass liquid-glass border border-[var(--separator)] text-[var(--text-primary)] rounded-tl-sm'
+                }`}>
+                  <p>{msg.message}</p>
+                </div>
+              )}
+            </div>
+          ))}
+          {isNegotiating && (
+            <div className="flex justify-start">
+              <div className="glass liquid-glass border border-[var(--separator)] rounded-2xl rounded-tl-sm p-3 shadow-sm flex gap-1">
+                <span className="w-2 h-2 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 border-t border-[var(--separator)] bg-white/50 dark:bg-black/50 backdrop-blur-md">
+          {agreedPrice ? (
+             <button 
+               onClick={handleAddAgreedToCart}
+               className="w-full bg-[#34C759] text-white font-bold py-3.5 rounded-xl hover:bg-[#2eaf4e] transition-all shadow-lg flex items-center justify-center gap-2"
+             >
+               Add to Cart at ₹{agreedPrice}/kg
+             </button>
+          ) : (
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] font-medium">₹</span>
+                <input 
+                  type="number"
+                  value={offerPrice}
+                  onChange={(e) => setOfferPrice(e.target.value)}
+                  placeholder="Enter your offer per kg..."
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleOffer(); }}
+                  disabled={rounds.length >= 10}
+                  className="w-full bg-[var(--fill-secondary)] border border-[var(--separator)] rounded-xl py-3 pl-8 pr-4 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50 transition-all shadow-sm disabled:opacity-50"
+                />
+              </div>
+              <button 
+                onClick={handleOffer}
+                disabled={!offerPrice || isNegotiating || rounds.length >= 10}
+                className="bg-[#007AFF] text-white px-5 rounded-xl text-sm font-bold disabled:opacity-50 hover:bg-[#005bb5] transition-colors shadow-sm"
+              >
+                Send
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }

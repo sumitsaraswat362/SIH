@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server';
-import { ai, DEFAULT_MODEL } from '@/lib/vertex-client';
+import { NextResponse } from "next/server";
+import { ai, DEFAULT_MODEL } from "@/lib/vertex-client";
+
+export const runtime = 'nodejs';
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
@@ -16,93 +19,80 @@ export async function POST(req: Request) {
       buyerName,
       roundNumber,
       qualityGrade,
-      organicCertified
+      organicCertified,
     } = body;
 
-    let action: 'accept' | 'counter' | 'reject' = 'reject';
-    let counterPrice: number | undefined;
-
-    const offerRatio = buyerOfferPerKg / askingPricePerKg;
-
-    if (buyerOfferPerKg >= askingPricePerKg * 0.95) {
-      action = 'accept';
-    } else if (buyerOfferPerKg < minimumPricePerKg) {
-      action = 'reject';
-    } else if (offerRatio < 0.70) {
-      action = 'reject';
-      // Suggest a reasonable counter (midpoint between ask and minimum) for the buyer to consider next time,
-      // but the action is technically reject for this specific offer.
-      counterPrice = Math.round((askingPricePerKg + minimumPricePerKg) / 2);
-    } else {
-      action = 'counter';
-      // Fair midpoint weighted toward the farmer
-      counterPrice = Math.round(buyerOfferPerKg + (askingPricePerKg - buyerOfferPerKg) * 0.6);
-      // Ensure we don't counter below minimum
-      if (counterPrice < minimumPricePerKg) {
-         counterPrice = minimumPricePerKg;
-      }
+    if (!askingPricePerKg || !buyerOfferPerKg) {
+      return NextResponse.json({ error: "Asking price and buyer offer are required" }, { status: 400 });
     }
 
-    const prompt = `You are the Annapurna AI Negotiation Agent, protecting farmer interests in a direct marketplace. You ensure farmers always get fair prices above MSP. You explain market dynamics and price reasoning in simple language. You are the farmer's advocate.
+    const offerRatio = buyerOfferPerKg / askingPricePerKg;
+    let action: "accept" | "counter" | "reject" = "counter";
+    let counterPrice = askingPricePerKg;
 
-Crop: ${cropType} ${variety ? `(${variety})` : ''}
-Quantity: ${quantityKg} kg
-Quality Grade: ${qualityGrade}
-Organic: ${organicCertified ? 'Yes' : 'No'}
+    const effectiveFloor = Math.max(minimumPricePerKg || 0, mspPerKg || 0);
 
-Farmer Asking Price: ₹${askingPricePerKg}/kg
-Farmer Minimum Price: ₹${minimumPricePerKg}/kg
-Government MSP: ₹${mspPerKg}/kg
-Current Mandi Price: ₹${mandiPricePerKg}/kg
+    if (buyerOfferPerKg >= askingPricePerKg * 0.95) {
+      action = "accept";
+    } else if (buyerOfferPerKg < effectiveFloor) {
+      action = "reject";
+    } else if (offerRatio < 0.70) {
+      action = "counter";
+      counterPrice = Math.round((askingPricePerKg + effectiveFloor) / 2);
+    } else {
+      action = "counter";
+      counterPrice = Math.round(buyerOfferPerKg * 0.4 + askingPricePerKg * 0.6);
+      if (counterPrice < effectiveFloor) counterPrice = effectiveFloor;
+    }
 
-Buyer (${buyerName}) Offer: ₹${buyerOfferPerKg}/kg
-Round Number: ${roundNumber}
+    const systemInstruction = `You are the Annapurna AI Negotiation Agent protecting farmer interests.
+RULES:
+1. Be polite but firm. You represent the farmer.
+2. Keep reasoning under 3 sentences.
+3. Return ONLY a valid JSON object. No markdown fences.`;
 
-AI Decision: ${action}
-${counterPrice ? `AI Counter Price: ₹${counterPrice}/kg` : ''}
+    const promptText = `Analyze this negotiation:
+Crop: ${organicCertified ? 'Organic ' : ''}${cropType} ${variety ? `(${variety})` : ''}
+Quality: Grade ${qualityGrade || 'Standard'} | Quantity: ${quantityKg} kg
+Farmer Asking: ₹${askingPricePerKg}/kg | Minimum: ₹${effectiveFloor}/kg
+Mandi Rate: ₹${mandiPricePerKg || 'N/A'}/kg | MSP: ${mspPerKg ? '₹' + mspPerKg + '/kg' : 'N/A'}
+Buyer (${buyerName || 'Buyer'}) Offer: ₹${buyerOfferPerKg}/kg (Round ${roundNumber || 1})
+Decision: ${action.toUpperCase()}${action === 'counter' ? ` at ₹${counterPrice}/kg` : ''}
 
-Write a professional, natural-language reasoning explaining this decision to the buyer on behalf of the farmer.
-Include a comparison to the current mandi rate ('This offer is X% above/below current mandi rate').
-Include MSP floor protection ('Price cannot go below ₹X/kg (Government MSP)') if relevant to the decision.
-No time pressure.
+Return JSON: {"reasoning":"...", "mandiComparison":"...", "farmerBenefit":"..."}`;
 
-Return ONLY a JSON object with this exact structure, do not wrap in markdown blocks:
-{
-  "reasoning": "your natural language explanation to the buyer",
-  "mandiComparison": "short string comparing to mandi price",
-  "farmerBenefit": "short string explaining how this helps the farmer"
-}`;
-
-    const result = await ai.models.generateContent({
+    const response = await ai.models.generateContent({
       model: DEFAULT_MODEL,
-      contents: prompt,
+      contents: [{ role: 'user', parts: [{ text: promptText }] }],
+      config: {
+        systemInstruction,
+        temperature: 0.2,
+        responseMimeType: "application/json",
+      }
     });
 
-    const responseText = result.text?.trim() || "{}";
-    // Strip markdown formatting if the model still includes it
-    const cleanJson = responseText.replace(/```json\n|\n```|```/g, '');
-    
-    let aiResponse;
+    let aiData;
     try {
-      aiResponse = JSON.parse(cleanJson);
-    } catch (e) {
-      aiResponse = {
-        reasoning: `We have decided to ${action} your offer. We are looking for a fair price above the mandi rate.`,
-        mandiComparison: `Current Mandi rate is ₹${mandiPricePerKg}/kg.`,
-        farmerBenefit: 'Ensures fair compensation for the farmer.'
+      const cleanText = (response.text || "").replace(/```json\n|\n```|```/g, "").trim();
+      aiData = JSON.parse(cleanText);
+    } catch {
+      aiData = {
+        reasoning: action === 'accept' ? "Fair offer accepted." : action === 'reject' ? "Offer below minimum." : "Counter offer proposed.",
+        mandiComparison: "Market aligned.",
+        farmerBenefit: "Fair price secured."
       };
     }
 
     return NextResponse.json({
       action,
-      counterPrice,
-      reasoning: aiResponse.reasoning,
-      mandiComparison: aiResponse.mandiComparison,
-      farmerBenefit: aiResponse.farmerBenefit
+      ...(action === 'counter' && { counterPrice }),
+      reasoning: aiData.reasoning,
+      mandiComparison: aiData.mandiComparison,
+      farmerBenefit: aiData.farmerBenefit
     });
 
   } catch (error) {
-    console.error('Negotiation API error:', error);
-    return NextResponse.json({ error: 'Failed to process negotiation' }, { status: 500 });
+    console.error("Negotiation API Error:", error);
+    return NextResponse.json({ error: "Failed to process negotiation" }, { status: 500 });
   }
 }
