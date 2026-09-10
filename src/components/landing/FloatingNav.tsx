@@ -1,93 +1,79 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { Leaf } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { Home, LayoutDashboard, Map, Gavel, Cloud } from "lucide-react";
 
-export default function FloatingNav() {
-  const [scrolled, setScrolled] = useState(false);
-  const { user } = useAuth();
+interface FloatingNavProps {
+  activeTab: "features" | "tracking" | "bidding" | "home" | "cloud-stack";
+}
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const NAV_ITEMS = [
-    { name: "Farmer Portal", href: "/farmer/dashboard" },
-    { name: "Marketplace", href: "/buyer" },
-    { name: "Analytics", href: "/analytics" },
-  ];
+export function FloatingNav({ activeTab }: FloatingNavProps) {
+  const tabs = [
+    { id: "features", label: "Features", href: "/features", icon: LayoutDashboard },
+    { id: "tracking", label: "Tracking", href: "/tracking", icon: Map },
+    { id: "bidding", label: "Bidding", href: "/bidding", icon: Gavel },
+    { id: "cloud-stack", label: "Cloud Stack", href: "/architecture", icon: Cloud },
+  ] as const;
 
   return (
-    <motion.div
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-4 left-0 right-0 z-50 flex justify-center px-4 transition-all duration-300 ${
-        scrolled ? "pointer-events-auto" : ""
-      }`}
-    >
-      <div 
-        className={`flex items-center justify-between px-4 py-2.5 rounded-full transition-all duration-500 ease-in-out border
-          ${scrolled 
-            ? "w-full max-w-3xl bg-[var(--bg-primary)]/80 backdrop-blur-xl shadow-lg border-[var(--separator)]" 
-            : "w-full max-w-5xl bg-transparent border-transparent"
-          }
-        `}
-      >
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group mr-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34C759] to-[#007AFF] flex items-center justify-center shadow-sm">
-            <Leaf className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-sm tracking-tight text-[var(--text-primary)] hidden sm:block">
-            Annapurna
-          </span>
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 bg-[var(--fill-secondary)]/50 backdrop-blur-md border border-[var(--separator)] rounded-full p-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="relative px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              <span className="relative z-10">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        {/* CTA / User Profile */}
-        <div className="flex items-center">
-          {user ? (
-            <Link 
-              href={user.role === 'farmer' ? '/farmer/dashboard' : '/buyer'}
-              className="flex items-center gap-2 bg-[var(--fill-secondary)] border border-[var(--separator)] px-3 py-1.5 rounded-full hover:bg-[var(--fill-tertiary)] transition-colors"
-            >
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#34C759] to-[#007AFF] flex items-center justify-center text-[10px] text-white font-bold">
-                {user.name.charAt(0)}
-              </div>
-              <span className="text-xs font-bold text-[var(--text-primary)] hidden sm:block">
-                {user.name.split(' ')[0]}
-              </span>
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="bg-[#34C759] hover:bg-[#2DB84E] text-white px-5 py-2 rounded-full text-xs font-bold transition-all shadow-[0_4px_14px_0_rgba(52,199,89,0.39)] hover:shadow-[0_6px_20px_rgba(52,199,89,0.23)] hover:-translate-y-0.5"
-            >
-              Login
-            </Link>
+    <>
+    <div className="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-50 w-fit max-w-[95%] md:max-w-fit">
+      <div className="flex items-center justify-between p-1 rounded-full glass border border-[var(--separator)] shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] relative">
+        
+        {/* Navigation Links */}
+        <div className="flex items-center gap-0.5 md:gap-2">
+          <Link
+            href="/"
+            className={`relative flex items-center justify-center px-2 py-1.5 md:px-4 md:py-2.5 text-[11px] md:text-sm font-medium transition-colors duration-300 z-10 ${
+              activeTab === "home" ? "text-[#000000] dark:text-[#FFFFFF]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+          {activeTab === "home" && (
+            <motion.div
+              layoutId="active-pill"
+              className="absolute inset-0 bg-[#FFFFFF] dark:bg-[#3A3A3C] rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.12)] border border-[#E5E5EA] dark:border-[#4A4A4C]"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
           )}
+          <span className="relative z-10"><Home className="w-4 h-4" /></span>
+        </Link>
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <Link
+              href={tab.href}
+              key={tab.id}
+              className={`relative flex items-center justify-center text-center px-2 py-1.5 md:px-4 md:py-2.5 text-[11px] md:text-sm font-bold transition-colors duration-300 z-10 ${
+                isActive ? "text-[#000000] dark:text-[#FFFFFF]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="absolute inset-0 bg-[#FFFFFF] dark:bg-[#3A3A3C] rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.12)] border border-[#E5E5EA] dark:border-[#4A4A4C]"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
+            </Link>
+          );
+        })}
         </div>
+
+        {/* Login Button */}
+        <div className="pl-1 md:pl-2">
+          <Link href="/login" className="flex items-center whitespace-nowrap px-3 py-1.5 md:px-5 md:py-2.5 rounded-full bg-gradient-to-b from-[#0A84FF] to-[#005DEB] shadow-[inset_0px_1px_1px_rgba(255,255,255,0.4)] hover:opacity-90 transition-opacity text-white text-[10px] md:text-sm font-bold">
+            Use App
+          </Link>
+        </div>
+
       </div>
-    </motion.div>
+    </div>
+    
+    {/* Page Logo Fixed Top Left */}
+    <div className="fixed top-6 left-6 md:top-8 md:left-8 z-40 hidden sm:flex items-center gap-2">
+      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#007AFF] to-[#34C759] flex items-center justify-center text-xs font-bold text-white shadow-sm">A</div>
+      <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Annapurna Marketplace</span>
+    </div>
+    </>
   );
 }

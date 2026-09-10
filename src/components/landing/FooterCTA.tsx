@@ -1,92 +1,89 @@
-"use client";
-
-import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, Leaf, Shield, Zap, Globe } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 
-export default function FooterCTA() {
-  const { user } = useAuth();
-  const targetPath = user 
-    ? (user.role === 'farmer' ? '/farmer/dashboard' : '/buyer')
-    : '/login';
-
+export function FooterCTA() {
   return (
-    <footer className="relative bg-[var(--bg-primary)] overflow-hidden">
-      {/* CTA Section */}
-      <div className="relative py-24 px-6">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] rounded-full bg-gradient-to-br from-[#34C759]/15 to-[#007AFF]/15 blur-[120px]" />
-        </div>
-
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-3xl md:text-5xl font-black text-[var(--text-primary)] tracking-tight mb-5"
-          >
-            Ready to trade directly?
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-lg text-[var(--text-secondary)] mb-10 max-w-xl mx-auto"
-          >
-            Join thousands of farmers and buyers trading directly. Fair prices. No middlemen. AI-powered negotiation.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <Link
-              href={targetPath}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#34C759] hover:bg-[#2DB84E] text-white rounded-full font-bold text-lg transition-all shadow-[0_8px_30px_rgba(52,199,89,0.3)] hover:shadow-[0_12px_40px_rgba(52,199,89,0.4)] hover:-translate-y-1"
-            >
-              {user ? "Go to Dashboard" : "Get Started Free"}
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </motion.div>
-        </div>
+    <footer className="relative w-full h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+      {/* Cinematic Blue Mesh Gradient Background */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
+        <motion.div 
+          className="absolute w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-[#007AFF] rounded-full mix-blend-screen filter blur-[100px] opacity-[0.15] dark:opacity-30"
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+            opacity: [0.15, 0.25, 0.15]
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-[#0A84FF] rounded-full mix-blend-screen filter blur-[120px] opacity-[0.1] dark:opacity-20"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [90, 0, 90],
+            opacity: [0.05, 0.15, 0.05]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       </div>
 
-      {/* Stats Row */}
-      <div className="border-t border-[var(--separator)] bg-[var(--fill-secondary)]">
-        <div className="max-w-5xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { icon: Leaf, label: "Farmers Onboarded", value: "2,450+" },
-            { icon: Shield, label: "MSP Protected", value: "100%" },
-            { icon: Zap, label: "Avg. Price Gain", value: "+38%" },
-            { icon: Globe, label: "States Covered", value: "12" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <stat.icon className="w-5 h-5 mx-auto mb-2 text-[#34C759]" />
-              <p className="text-2xl font-black text-[var(--text-primary)]">{stat.value}</p>
-              <p className="text-xs font-semibold text-[var(--text-tertiary)] mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl">
+        <motion.h2 
+          className="text-5xl md:text-7xl font-semibold tracking-tighter text-[var(--text-primary)] mb-8 leading-tight drop-shadow-sm"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          Ready to revolutionize <br /> your agricultural trade?
+        </motion.h2>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-[var(--separator)] bg-[var(--bg-primary)]">
-        <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-4 h-4 text-[#34C759]" />
-            <span className="text-sm font-bold text-[var(--text-primary)]">Annapurna</span>
-            <span className="text-xs text-[var(--text-tertiary)]">© 2026</span>
-          </div>
-          <div className="flex items-center gap-4 text-xs text-[var(--text-tertiary)] font-medium">
-            <span>SIH Problem Statement 26033</span>
-            <span>•</span>
-            <span>Ministry of Consumer Affairs</span>
-          </div>
+        <motion.p 
+          className="text-xl text-[var(--text-secondary)] font-medium mb-12 max-w-xl"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+        >
+          Join thousands of farmers in maximizing earnings and eliminating middlemen with Annapurna's AI marketplace.
+        </motion.p>
+
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <Link 
+            href="/login"
+            className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-b from-[#0A84FF] to-[#005DEB] rounded-full text-white text-lg font-bold shadow-[inset_0px_1px_1px_rgba(255,255,255,0.4),0_10px_40px_rgba(0,122,255,0.3)] overflow-hidden"
+          >
+            <span className="relative z-10">Launch Dashboard</span>
+            <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+            
+            {/* Pulsing effect on hover inside button */}
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+          </Link>
+        </motion.div>
+      </div>
+      
+      {/* Footer Links */}
+      <div className="absolute bottom-8 w-full px-12 flex justify-between items-center text-xs font-bold text-[var(--text-tertiary)] z-10">
+        <div>© 2026 Annapurna. All rights reserved.</div>
+        <div className="flex gap-6">
+          <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Privacy</a>
+          <a href="#" className="hover:text-[var(--text-primary)] transition-colors">Terms</a>
+          <a href="#" className="hover:text-[var(--text-primary)] transition-colors">System Status</a>
         </div>
       </div>
     </footer>

@@ -858,7 +858,8 @@ function SettingsSection({ user }: { user: any }) {
 // --- MAIN DASHBOARD COMPONENT ---
 export default function FarmerDashboard() {
   const { user, logout } = useAuth();
-  const { listings, orders } = useAppState();
+  const { state, dispatch } = useAppState();
+  const { listings, orders } = state;
 
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showListingModal, setShowListingModal] = useState(false);
