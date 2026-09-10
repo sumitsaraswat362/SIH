@@ -1,38 +1,50 @@
-# 🏔️ Annapurna 5-Minute Demo Script
+## 🎬 5-Minute Demo Script — Annapurna
 
-## 1. Opening Hook (0:00 - 0:30)
-**SAY:** "Every year, India loses over ₹1.5 Lakh Crore to food wastage. The primary culprit? Broken, fragmented logistics and compromised cold-chain integrity. Traditional telematics only tell you a truck *has already broken down* when it's too late. Today, we're introducing **Annapurna** — an autonomous multi-agent AI logistics ecosystem that stops food waste *before* it happens."
+### 0:00 - 0:30 | The Hook
+"India loses ₹92,000 crore annually because 3-4 middlemen stand between a farmer and a consumer. A farmer selling tomatoes at ₹25/kg in the mandi sees the same tomatoes sold at ₹80/kg in retail — but takes home only ₹15/kg after commission agents take their cut. Annapurna eliminates every single middleman."
 
-## 2. Hardware Demo (0:30 - 1:30)
-*(Hold up the ESP32 hardware device)*
-**SAY:** "This is our custom IoT edge device powered by the ESP32-S3. It features multiple sensors, including the DHT22 for temperature and humidity. Let's simulate a compressor failure."
-**CLICK/ACTION:** *(Breathe heavily on the DHT22 sensor to spike temperature and humidity)*
-**SAY:** "As you can see on the OLED display, the temperature spikes immediately. This telemetry data is streamed directly to our cloud in real-time."
+### 0:30 - 1:30 | Farmer Lists Produce
+- Open the Farmer Portal
+- Farmer Ramesh Patil from Nashik lists 500kg of tomatoes
+- Sets minimum price at ₹28/kg (above MSP)
+- Uploads harvest photo → AI grades quality as A+ automatically
+- Shows real-time mandi price comparison: "Mandi: ₹25/kg | Your price: ₹35/kg | +40% more"
 
-## 3. Fleet Dashboard (1:30 - 2:30)
-*(Switch to the Fleet Dashboard on screen)*
-**SAY:** "Back at the Fleet Command Center, we can see our live map with pinpoint GPS accuracy. Notice our truck's telemetry data updating live."
-**CLICK/ACTION:** *(Point to the active alerts and the specific truck showing an emergency status)*
-**SAY:** "The sudden temperature spike has triggered our AI Neural Engine. The AI calculates the time-to-spoilage window using ARIMA+ forecasting, autonomously reroutes the truck to a cold storage within a 50km radius using Haversine distance calculations, and instantly broadcasts the distress cargo to nearby wholesalers."
+### 1:30 - 2:30 | AI Matchmaking & Buyer Portal
+- Switch to Buyer Marketplace
+- Show product catalog with farm-fresh produce
+- Buyer searches: "organic tomatoes near Pune under ₹40"
+- AI Smart Filter extracts structured query instantly
+- Show price comparison: "Farm: ₹35 | Mandi: ₹45 | Retail: ₹80 — You save ₹45/kg!"
+- Buyer adds to cart and places order
 
-## 4. AI Negotiation (2:30 - 3:30)
-*(Switch to the Wholesaler Marketplace and open the Negotiation Panel)*
-**SAY:** "Now we're in the Wholesaler portal. Wholesalers are alerted to this distress cargo and can bid on it. But what if they lowball the price?"
-**CLICK/ACTION:** *(Submit a very low counter-offer on a cargo)*
-**SAY:** "Our Gemini-powered AI Negotiation Agent steps in. It evaluates the bid in real-time, considering the cargo's remaining life, and automatically issues a counter-offer. It's a 3-round system ensuring fair pricing."
-**CLICK/ACTION:** *(Click the 'Request Human' button in the chat)*
-**SAY:** "If negotiations stall, the wholesaler can trigger a real-time Firestore-backed chat with the fleet manager to resolve it instantly."
+### 2:30 - 3:30 | AI Negotiation & Demand Forecasting
+- Show AI negotiation running on behalf of farmer
+- AI protects MSP floor — never lets price go below government MSP
+- Switch to Farmer Dashboard — show earnings: "+₹12,450 vs mandi this month"
+- Show Demand Forecast: "Tomato demand ↑ 23% next week in Maharashtra"
+- Show ARIMA price prediction chart
 
-## 5. Wholesaler Filters (3:30 - 4:30)
-*(Close the negotiation panel and show the Wholesaler Dashboard main view)*
-**SAY:** "To find exactly what they need, wholesalers use our Advanced Multi-Criteria Filter."
-**CLICK/ACTION:** *(Expand the Advanced Filters section and type in the AI Smart Filter bar)*
-**SAY:** "We have over 10 filtering criteria, including telemetry and geographic distance. But they can also just type in natural language, like 'I need 500kg of seafood under 300 rupees'. Our AI Smart Filter parses this and applies the filters."
-**CLICK/ACTION:** *(Show Best Match sorting, click 'Export CSV', and save a filter template)*
-**SAY:** "They can sort by Best Match AI scoring, export the filtered data to CSV, or save the layout as a local template for future use."
+### 3:30 - 4:30 | Advanced AI Features
+- Demonstrate multilingual voice: farmer speaks in Hindi to list produce
+- Show AI Nerve Center — real-time agent decisions
+- Show Text-to-SQL analytics: "What are the most sold crops in Maharashtra?"
+- Show FSSAI Legal RAG: compliance verification
+- Show Document AI: Aadhaar/KCC OCR verification
 
-## 6. Closing (4:30 - 5:00)
-*(Switch back to the Fleet Dashboard or show a floating Help Bot)*
-**SAY:** "Throughout this process, automated Gmail alerts via Nodemailer and instant WhatsApp notifications via Twilio have kept all stakeholders informed."
-**CLICK/ACTION:** *(Show the AI Help Bot floating on the page)*
-**SAY:** "With Annapurna, we've reduced response times to under 90 seconds, turning a 100% loss into an 85% cargo value recovery. Zero human intervention required. We are saving the harvest."
+### 4:30 - 5:00 | Impact & Closing
+- "Every transaction on Annapurna eliminates 3-4 middlemen"
+- "Farmers earn 40% more. Consumers pay 45% less."
+- "5 autonomous AI agents. 9 Indian languages. Real government mandi prices."
+- "Built with Google Cloud, Gemini AI, and Firebase — scales from 10 farmers to 14 crore."
+- "This is not just a hackathon project. This is the future of Indian agriculture."
+
+### Judge Q&A Cheat Sheet
+
+| Question | Prepared Answer |
+| :--- | :--- |
+| **How does the AI Negotiation actually work?** | Our Vertex AI-powered agent acts as the farmer's proxy. It evaluates the buyer's offer against the farmer's asking price, the government's Minimum Support Price (MSP), and real-time mandi rates. If an offer is within 95% of the ask, it accepts. Between 70% and 94%, it counters favorably for the farmer. It strictly rejects anything below the MSP floor, ensuring farmers are never exploited. |
+| **Where do you get your pricing data?** | We ingest daily APMC Mandi prices from data.gov.in / Agmarknet to ensure accurate, real-world baseline pricing. We also cross-reference MSPs set by the government. |
+| **How does delivery work without middlemen?** | We support multiple delivery modes: Farm Pickup (for local buyers/FPOs), Platform Logistics (integration with 3PLs), or FPO Hub delivery, depending on the buyer's location and volume. Logistics costs are transparently shown at checkout. |
+| **How do illiterate farmers use this platform?** | The platform has full multilingual voice support. A farmer can simply click the microphone button and say "I want to sell 500kg of tomatoes for ₹35" in Hindi, Marathi, Tamil, etc. The AI handles data entry automatically. |
+| **How are you handling payments?** | We use an escrow-based payment system. When an order is placed, buyer funds are held securely. Once the quality is verified and delivery completed, payment is released directly to the farmer, ensuring trust on both sides. |

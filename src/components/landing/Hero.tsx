@@ -41,28 +41,28 @@ export function Hero() {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1 className="text-5xl md:text-8xl font-semibold tracking-tighter mb-4 md:mb-6 text-[var(--text-primary)] drop-shadow-sm pb-2 leading-tight">
-            Autonomous <br /> Multi-Agent AI.
+            Farm Direct. <br /> AI Powered.
           </h1>
           <p className="text-xl text-[var(--text-secondary)] font-medium max-w-2xl mx-auto">
-            The ultimate Autonomous Agent Nerve Center for direct trade. 40% earnings increase, 3-4 middlemen eliminated, with &lt;90 second AI matching.
+            India&apos;s first AI marketplace connecting 14 crore farmers directly to buyers. Zero middlemen. 40% better farmer earnings. Real-time mandi prices. MSP-protected pricing.
           </p>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-10">
             <a href="/farmer" className="relative group rounded-full">
               <span className="absolute -inset-0.5 bg-gradient-to-r from-[#34C759] to-[#32ADE6] rounded-full blur opacity-75 group-hover:opacity-100 transition duration-200"></span>
               <span className="relative flex items-center justify-center px-8 py-4 bg-[var(--bg-primary)] rounded-full text-[var(--text-primary)] font-bold tracking-wide border border-[var(--separator)] group-hover:bg-[var(--fill-secondary)] transition-colors shadow-xl">
-                Farmer Portal (List Harvest)
+                🌾 Farmer Portal
               </span>
             </a>
-            <a href="/wholesaler" className="relative group rounded-full">
+            <a href="/buyer" className="relative group rounded-full">
               <span className="absolute -inset-0.5 bg-gradient-to-r from-[#FF9500] to-[#FF2D55] rounded-full blur opacity-75 group-hover:opacity-100 transition duration-200"></span>
               <span className="relative flex items-center justify-center px-8 py-4 bg-[var(--bg-primary)] rounded-full text-[var(--text-primary)] font-bold tracking-wide border border-[var(--separator)] group-hover:bg-[var(--fill-secondary)] transition-colors shadow-xl">
-                Buyer Portal (Find Produce)
+                🛒 Buy Direct from Farms
               </span>
             </a>
-            <a href="/nerve-center" className="relative group rounded-full hidden md:block">
+            <a href="/farmer/dashboard" className="relative group rounded-full hidden md:block">
               <span className="absolute -inset-0.5 bg-gradient-to-r from-[#AF52DE] to-[#5E5CE6] rounded-full blur opacity-75 group-hover:opacity-100 transition duration-200"></span>
               <span className="relative flex items-center justify-center px-8 py-4 bg-[var(--bg-primary)] rounded-full text-[var(--text-primary)] font-bold tracking-wide border border-[var(--separator)] group-hover:bg-[var(--fill-secondary)] transition-colors shadow-xl">
-                AI Nerve Center
+                📊 Farmer Dashboard
               </span>
             </a>
           </div>

@@ -15,9 +15,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Annapurna | AI-Powered Direct Farmer-to-Buyer Marketplace",
+  title: "Annapurna | Direct Farm-to-Fork Marketplace — SIH 26033",
   description:
-    "Autonomous AI marketplace that eliminates intermediaries between farmers and wholesale buyers. Powered by Multi-Agent AI Negotiation, FSSAI Legal Compliance, and Multilingual Voice — increasing farmer earnings by up to 40% while reducing consumer prices. Built for SIH26033.",
+    "India's first AI-powered digital marketplace connecting farmers and FPOs directly with consumers and bulk buyers. Eliminates middlemen, provides logistics support, uses AI for demand forecasting and route optimization. PSID 26033 — Ministry of Consumer Affairs, Food & Public Distribution.",
+  keywords: ["farmer marketplace", "FPO", "direct farm", "SIH 26033", "agriculture", "AI demand forecasting", "eliminate middlemen", "mandi prices", "MSP"],
+  openGraph: {
+    title: "Annapurna — Direct Farm-to-Fork Marketplace",
+    description: "Eliminating intermediaries. Better prices for farmers. Lower prices for consumers.",
+    type: "website",
+  },
 };
 
 import { AuthProvider } from "@/lib/auth";
