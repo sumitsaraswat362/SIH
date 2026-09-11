@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'annapurna_hackathon_super_secret');
 
 // Add routes that require authentication
-const protectedRoutes = ['/fleet', '/wholesaler'];
+const protectedRoutes = ['/fleet', '/wholesaler', '/farmer', '/buyer'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

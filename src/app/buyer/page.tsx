@@ -789,7 +789,7 @@ function NegotiationModal({ listing, qty, onClose, onAddToCart }: { listing: Pro
           askingPricePerKg: listing.askingPricePerKg,
           minimumPricePerKg: listing.minimumPricePerKg || listing.currentMandiPrice,
           mandiPricePerKg: listing.currentMandiPrice,
-          mspPerKg: (listing as any).mspPerKg || 0,
+          mspPerKg: listing.minimumSupportPrice || 0,
           buyerOfferPerKg: numOffer,
           buyerName: "Buyer",
           roundNumber: buyerRounds,

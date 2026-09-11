@@ -101,7 +101,10 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
     }
 
-    await firestore.collection('orders').doc(orderId).update(updateData);
+    // Upsert instead of update: falls back to demo/seed order data when
+    // Firestore has no matching doc yet (fresh deploy / pre-first-sale state),
+    // so Accept/Reject never silently no-ops on the farmer dashboard.
+    await firestore.collection('orders').doc(orderId).set(updateData, { merge: true });
 
     return NextResponse.json({ success: true, updated: updateData });
   } catch (error) {

@@ -83,19 +83,27 @@ function OverviewSection({ onList, orders, listings }: { onList: () => void; ord
   const middlemanSavings = orders.reduce((sum, o) => sum + (o.middlemanSavings || 0), 0);
   const mandiPremium = orders.length ? (orders.reduce((sum, o) => sum + (o.mandiPriceComparison || 0), 0) / orders.length) : 0;
 
-  // Build chart from actual order data grouped by day
+  // Build chart from the last 7 calendar days (bucketing by weekday name alone
+  // would merge orders from different weeks into the same bar once history
+  // grows past 7 days).
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const earningsByDay: Record<string, number> = {};
-  dayNames.forEach(d => earningsByDay[d] = 0);
+  const last7Dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - (6 - i));
+    return d;
+  });
+  const earningsByDate: Record<string, number> = {};
+  last7Dates.forEach(d => { earningsByDate[d.toDateString()] = 0; });
   orders.forEach(o => {
     if (o.createdAt) {
-      const day = dayNames[new Date(o.createdAt).getDay()];
-      earningsByDay[day] += (o.farmerPayout || 0);
+      const key = new Date(o.createdAt).toDateString();
+      if (key in earningsByDate) earningsByDate[key] += (o.farmerPayout || 0);
     }
   });
-  const chartData = dayNames.slice(1).concat(dayNames.slice(0, 1)).map(day => ({
-    name: day,
-    earnings: earningsByDay[day],
+  const chartData = last7Dates.map(d => ({
+    name: dayNames[d.getDay()],
+    earnings: earningsByDate[d.toDateString()],
   }));
 
   return (
@@ -666,7 +674,7 @@ function OrdersSection({ orders, dispatch }: { orders: Order[]; dispatch: React.
 }
 
 // --- DEMAND FORECAST SECTION ---
-function ForecastsSection() {
+function ForecastsSection({ region }: { region?: string }) {
   const [forecasts, setForecasts] = useState(DEMO_FORECASTS);
   const [isAI, setIsAI] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -674,7 +682,7 @@ function ForecastsSection() {
   useEffect(() => {
     const crops = ['onions', 'tomatoes', 'wheat', 'potatoes', 'grapes'];
     Promise.all(crops.map(crop =>
-      fetch(`/api/demand-forecast?crop=${crop}&region=Maharashtra`)
+      fetch(`/api/demand-forecast?crop=${crop}&region=${encodeURIComponent(region || 'Maharashtra')}`)
         .then(res => res.ok ? res.json() : null)
         .catch(() => null)
     )).then(results => {
@@ -684,7 +692,7 @@ function ForecastsSection() {
         setIsAI(true);
       }
     }).finally(() => setLoading(false));
-  }, []);
+  }, [region]);
 
   return (
     <div className="space-y-6">
@@ -1043,7 +1051,7 @@ export default function FarmerDashboard() {
               {activeTab === "overview" && <OverviewSection onList={() => setShowListingModal(true)} orders={myOrders} listings={myListings} />}
               {activeTab === "listings" && <ListingsSection listings={myListings} />}
               {activeTab === "orders" && <OrdersSection orders={myOrders} dispatch={dispatch} />}
-              {activeTab === "forecasts" && <ForecastsSection />}
+              {activeTab === "forecasts" && <ForecastsSection region={user?.state} />}
               {activeTab === "mandi" && <MandiPricesSection />}
               {activeTab === "schemes" && <SchemesSection />}
               {activeTab === "settings" && <SettingsSection user={user} />}
