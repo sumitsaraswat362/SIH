@@ -6,7 +6,7 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind%20CSS%204-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=white)
 ![Gemini AI](https://img.shields.io/badge/Google%20Gemini%202.5%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)
-![SIH 26033](https://img.shields.io/badge/SIH%202024-PSID%2026033-success?style=for-the-badge)
+![SIH 26033](https://img.shields.io/badge/SIH%202026-PSID%2026033-success?style=for-the-badge)
 
 A smart, AI-driven digital marketplace built for **Smart India Hackathon (SIH) 2026**. Annapurna aims to empower Indian farmers by eliminating middlemen, increasing earnings, and providing consumers and bulk buyers with fresh produce at fair prices.
 
