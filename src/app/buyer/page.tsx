@@ -10,7 +10,7 @@ import {
   Search, MapPin, Leaf, Clock, ShoppingCart, 
   TrendingDown, CheckCircle2, ChevronDown, Filter, 
   Sparkles, Plus, Minus, Handshake, CreditCard,
-  MessageSquare, X, ArrowRight
+  MessageSquare, X, ArrowRight, LogOut
 } from "lucide-react";
 
 const CATEGORIES = ["All", "Vegetables", "Fruits", "Grains", "Pulses", "Spices", "Dairy", "Organic"];
@@ -24,7 +24,7 @@ const SORT_OPTIONS = [
 
 export default function BuyerMarketplace() {
   const { state, dispatch } = useAppState();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   // Use state.listings if available, otherwise fallback to DEMO_LISTINGS
   const activeListings = state.listings.length > 0 ? state.listings : DEMO_LISTINGS;
@@ -158,6 +158,12 @@ export default function BuyerMarketplace() {
             <div className="h-11 px-3 rounded-xl bg-gradient-to-br from-[#34C759]/20 to-[#5AC8FA]/20 border border-[var(--separator)] flex items-center justify-center shadow-sm gap-2">
               <span className="font-bold text-[#248A3D]">{user?.name || "Buyer"}</span>
             </div>
+            <button
+              onClick={logout}
+              className="h-11 px-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold text-sm hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
@@ -177,7 +183,7 @@ export default function BuyerMarketplace() {
           <div className="relative z-10 hidden md:flex h-full items-center justify-center pl-4 border-l border-[var(--separator)]">
             <div className="text-center">
               <p className="text-xs font-bold text-[var(--text-tertiary)] uppercase">Platform Fee</p>
-              <p className="text-2xl font-extrabold text-[#34C759]">Only 2%</p>
+              <p className="text-2xl font-extrabold text-[#34C759]">₹0 Free</p>
             </div>
           </div>
         </div>
@@ -454,19 +460,25 @@ function ProduceCard({ listing, onNegotiate }: { listing: ProduceListing, onNego
         </span>
       </div>
 
-      {/* Image Placeholder / Gradient */}
+      {/* Image */}
       <div className="h-40 w-full bg-gradient-to-br from-[var(--fill-secondary)] to-[var(--fill-tertiary)] flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-white/5 dark:bg-black/5" />
-        <span className="text-6xl drop-shadow-md">
-          {listing.cropType === "tomatoes" ? "🍅" : 
-           listing.cropType === "onions" ? "🧅" : 
-           listing.cropType === "wheat" ? "🌾" : 
-           listing.cropType === "grapes" ? "🍇" : 
-           listing.cropType === "bananas" ? "🍌" : 
-           listing.cropType === "oranges" ? "🍊" : 
-           listing.cropType === "capsicum" ? "🫑" :
-           listing.cropType === "turmeric" ? "🟡" : "🌿"}
-        </span>
+        {listing.qualityPhotoUrl ? (
+          <img src={listing.qualityPhotoUrl} alt={listing.cropType} className="w-full h-full object-cover" />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-white/5 dark:bg-black/5" />
+            <span className="text-6xl drop-shadow-md">
+              {listing.cropType === "tomatoes" ? "🍅" : 
+               listing.cropType === "onions" ? "🧅" : 
+               listing.cropType === "wheat" ? "🌾" : 
+               listing.cropType === "grapes" ? "🍇" : 
+               listing.cropType === "bananas" ? "🍌" : 
+               listing.cropType === "oranges" ? "🍊" : 
+               listing.cropType === "capsicum" ? "🫑" :
+               listing.cropType === "turmeric" ? "🟡" : "🌿"}
+            </span>
+          </>
+        )}
       </div>
 
       <div className="p-4 flex flex-col flex-1">
@@ -567,39 +579,48 @@ function CheckoutModal({ onClose, cart, user, dispatch }: { onClose: () => void,
   const [paymentMethod, setPaymentMethod] = useState("upi");
 
   const subtotal = cart.reduce((acc, item) => acc + item.subtotal, 0);
-  const platformFee = Math.round(subtotal * 0.02);
-  const deliveryFee = 50; // Mock fixed delivery fee
-  const total = subtotal + platformFee + deliveryFee;
+  const platformFee = 0;
+  const deliveryFee = 50;
+  const total = subtotal + deliveryFee;
 
   const address = user?.address || user?.location || "123 Smart Farm Road, Pune, Maharashtra";
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
     try {
-      // POSTs to /api/orders for each cart item
-      await Promise.all(cart.map(item => 
-        fetch('/api/orders', {
+      const results = await Promise.all(cart.map(async (item) => {
+        const res = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             listingId: item.listingId,
             farmerId: item.listing.farmerId,
-            buyerId: user?.id || "guest",
+            farmerName: item.listing.farmerName,
+            buyerId: user?.id || 'guest',
+            buyerName: user?.name || 'Guest Buyer',
+            cropType: item.listing.cropType,
+            variety: item.listing.variety,
             quantityKg: item.quantityKg,
             agreedPricePerKg: item.pricePerKg,
-            deliveryMode: "platform_logistics"
+            totalAmount: item.subtotal,
+            deliveryMode: 'platform_logistics',
+            deliveryAddress: user?.address || user?.city || 'Address pending',
           })
-        })
-      ));
+        });
+        if (!res.ok) throw new Error('Order creation failed');
+        return res.json();
+      }));
 
-      // In real life we wait for success response
-      setTimeout(() => {
-        dispatch({ type: "CLEAR_CART" });
-        setSuccess(true);
-        setIsProcessing(false);
-      }, 1500);
+      results.forEach(order => {
+        dispatch({ type: 'ADD_ORDER', order });
+      });
+
+      dispatch({ type: 'CLEAR_CART' });
+      setSuccess(true);
+      setIsProcessing(false);
     } catch(e) {
       console.error(e);
+      alert('Failed to place order. Please try again.');
       setIsProcessing(false);
     }
   };
@@ -666,8 +687,8 @@ function CheckoutModal({ onClose, cart, user, dispatch }: { onClose: () => void,
                 <span className="text-[var(--text-primary)] font-medium">₹{subtotal}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[var(--text-secondary)]">Platform Fee (2%)</span>
-                <span className="text-[var(--text-primary)] font-medium">₹{platformFee}</span>
+                <span className="text-[var(--text-secondary)]">Platform Fee</span>
+                <span className="text-[#34C759] font-bold">FREE ✓</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-[var(--text-secondary)]">Delivery Fee</span>
@@ -756,13 +777,24 @@ function NegotiationModal({ listing, qty, onClose, onAddToCart }: { listing: Pro
     setIsNegotiating(true);
 
     try {
+      const buyerRounds = newRounds.filter(r => r.role === 'buyer').length;
       const res = await fetch('/api/negotiation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           listingId: listing.id, 
-          offerPrice: numOffer, 
-          history: newRounds 
+          cropType: listing.cropType,
+          variety: listing.variety,
+          quantityKg: qty,
+          askingPricePerKg: listing.askingPricePerKg,
+          minimumPricePerKg: listing.minimumPricePerKg || listing.currentMandiPrice,
+          mandiPricePerKg: listing.currentMandiPrice,
+          mspPerKg: (listing as any).mspPerKg || 0,
+          buyerOfferPerKg: numOffer,
+          buyerName: "Buyer",
+          roundNumber: buyerRounds,
+          qualityGrade: listing.qualityGrade,
+          organicCertified: listing.organicCertified,
         })
       });
 
@@ -773,32 +805,18 @@ function NegotiationModal({ listing, qty, onClose, onAddToCart }: { listing: Pro
       if (res.ok) {
         const data = await res.json();
         action = data.action;
-        aiPrice = data.price;
-        aiMessage = data.message || aiMessage;
+        aiPrice = data.counterPrice || numOffer;
+        aiMessage = data.reasoning || "Offer processed.";
       } else {
-        // Fallback logic if API isn't wired fully
-        await new Promise(r => setTimeout(r, 1000));
-        const mandi = listing.currentMandiPrice;
-        if (numOffer >= listing.askingPricePerKg) {
-          action = "accept";
-          aiPrice = numOffer;
-          aiMessage = "That's a fair price. I accept your offer!";
-        } else if (numOffer >= mandi + (listing.askingPricePerKg - mandi) * 0.5) {
-          action = "counter";
-          aiPrice = Math.floor(listing.askingPricePerKg - 2);
-          aiMessage = `I can lower it a bit to ₹${aiPrice}/kg, but not ₹${numOffer}. It's high quality produce.`;
-        } else {
-          action = "reject";
-          aiMessage = `₹${numOffer} is too low. The mandi price itself is ₹${mandi}. I cannot sell below my cost.`;
-        }
+        aiMessage = "Negotiation service unavailable. Please try again.";
       }
 
       setRounds([...newRounds, { role: "ai", message: aiMessage, price: action !== "reject" ? aiPrice : undefined }]);
 
       if (action === "accept") {
-        setAgreedPrice(aiPrice);
-      } else if (rounds.length >= 9) { // 5 rounds max (buyer+ai * 5 = 10 messages)
-        setRounds(prev => [...prev, { role: "system", message: "Maximum negotiation rounds reached." }]);
+        setAgreedPrice(aiPrice || numOffer);
+      } else if (buyerRounds >= 10) {
+        setRounds(prev => [...prev, { role: "system", message: "Maximum 10 negotiation rounds reached." }]);
       }
 
     } catch (e) {

@@ -7,11 +7,11 @@ import { Type, Schema } from '@google/genai';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const cropType = searchParams.get('cropType');
-    const region = searchParams.get('region');
+    const cropType = searchParams.get('cropType') || searchParams.get('crop');
+    const region = searchParams.get('region') || 'Maharashtra';
 
-    if (!cropType || !region) {
-      return NextResponse.json({ error: 'Missing cropType or region' }, { status: 400 });
+    if (!cropType) {
+      return NextResponse.json({ error: 'Missing cropType parameter' }, { status: 400 });
     }
 
     const systemPrompt = "You are an agricultural market analyst for India. Given a crop type and region, predict the demand and price trend for the next 7-14 days. Consider seasonal patterns, recent market data, and weather conditions. Return structured JSON.";

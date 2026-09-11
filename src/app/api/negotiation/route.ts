@@ -26,70 +26,116 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Asking price and buyer offer are required" }, { status: 400 });
     }
 
-    const offerRatio = buyerOfferPerKg / askingPricePerKg;
-    let action: "accept" | "counter" | "reject" = "counter";
-    let counterPrice = askingPricePerKg;
+    const effectiveFloor = Math.max(minimumPricePerKg || 0, mspPerKg || 0, (mandiPricePerKg || 0) * 0.9);
+    const round = roundNumber || 1;
 
-    const effectiveFloor = Math.max(minimumPricePerKg || 0, mspPerKg || 0);
+    // Let Gemini AI make the ACTUAL negotiation decision
+    const systemInstruction = `You are the Annapurna AI Negotiation Agent. You protect farmer interests while facilitating fair deals.
 
-    if (buyerOfferPerKg >= askingPricePerKg * 0.95) {
-      action = "accept";
-    } else if (buyerOfferPerKg < effectiveFloor) {
-      action = "reject";
-    } else if (offerRatio < 0.70) {
-      action = "counter";
-      counterPrice = Math.round((askingPricePerKg + effectiveFloor) / 2);
-    } else {
-      action = "counter";
-      counterPrice = Math.round(buyerOfferPerKg * 0.4 + askingPricePerKg * 0.6);
-      if (counterPrice < effectiveFloor) counterPrice = effectiveFloor;
-    }
+CONTEXT: This is a direct farmer-to-buyer marketplace eliminating middlemen. You negotiate on behalf of the farmer.
 
-    const systemInstruction = `You are the Annapurna AI Negotiation Agent protecting farmer interests.
-RULES:
-1. Be polite but firm. You represent the farmer.
-2. Keep reasoning under 3 sentences.
-3. Return ONLY a valid JSON object. No markdown fences.`;
+HARD RULES:
+1. NEVER accept below the effective floor price of ₹${effectiveFloor}/kg (this is the MSP/mandi-derived minimum).
+2. Be flexible — if the offer is close to asking price (within 10%), accept it.
+3. On early rounds (1-3), counter higher. On later rounds (4-7), be more willing to meet in the middle. After round 7, try to close the deal.
+4. Consider quality grade, organic certification, and market conditions in your reasoning.
+5. Your counter price MUST be between the buyer's offer and the asking price, and ABOVE the floor.
 
-    const promptText = `Analyze this negotiation:
-Crop: ${organicCertified ? 'Organic ' : ''}${cropType} ${variety ? `(${variety})` : ''}
-Quality: Grade ${qualityGrade || 'Standard'} | Quantity: ${quantityKg} kg
-Farmer Asking: ₹${askingPricePerKg}/kg | Minimum: ₹${effectiveFloor}/kg
-Mandi Rate: ₹${mandiPricePerKg || 'N/A'}/kg | MSP: ${mspPerKg ? '₹' + mspPerKg + '/kg' : 'N/A'}
-Buyer (${buyerName || 'Buyer'}) Offer: ₹${buyerOfferPerKg}/kg (Round ${roundNumber || 1})
-Decision: ${action.toUpperCase()}${action === 'counter' ? ` at ₹${counterPrice}/kg` : ''}
+Return ONLY valid JSON with this exact schema:
+{
+  "action": "accept" | "counter" | "reject",
+  "counterPrice": <number or null>,
+  "reasoning": "<2-3 sentence explanation to the buyer>",
+  "mandiComparison": "<short comparison to mandi rate>",
+  "farmerBenefit": "<how this protects the farmer>"
+}`;
 
-Return JSON: {"reasoning":"...", "mandiComparison":"...", "farmerBenefit":"..."}`;
+    const promptText = `NEGOTIATION ROUND ${round}:
+Crop: ${organicCertified ? 'Organic ' : ''}${cropType}${variety ? ` (${variety})` : ''}
+Quality Grade: ${qualityGrade || 'Standard'}
+Quantity: ${quantityKg || 'N/A'} kg
+Farmer's Asking Price: ₹${askingPricePerKg}/kg
+Effective Floor (absolute minimum): ₹${effectiveFloor}/kg
+Current Mandi Rate: ₹${mandiPricePerKg || 'N/A'}/kg
+Government MSP: ${mspPerKg ? '₹' + mspPerKg + '/kg' : 'N/A'}
 
-    const response = await ai.models.generateContent({
-      model: DEFAULT_MODEL,
-      contents: [{ role: 'user', parts: [{ text: promptText }] }],
-      config: {
-        systemInstruction,
-        temperature: 0.2,
-        responseMimeType: "application/json",
-      }
-    });
+Buyer "${buyerName || 'Buyer'}" offers: ₹${buyerOfferPerKg}/kg
 
-    let aiData;
+Make your negotiation decision. Remember:
+- If offer >= ${Math.round(askingPricePerKg * 0.90)}, you should ACCEPT (it's within 10% of asking)
+- If offer < ${effectiveFloor}, you MUST REJECT
+- Otherwise, COUNTER with a fair price between offer and asking
+- This is round ${round} of max 10. ${round >= 7 ? 'We are in late rounds — try to close the deal.' : ''}`;
+
     try {
-      const cleanText = (response.text || "").replace(/```json\n|\n```|```/g, "").trim();
-      aiData = JSON.parse(cleanText);
-    } catch {
-      aiData = {
-        reasoning: action === 'accept' ? "Fair offer accepted." : action === 'reject' ? "Offer below minimum." : "Counter offer proposed.",
-        mandiComparison: "Market aligned.",
-        farmerBenefit: "Fair price secured."
-      };
-    }
+      const response = await ai.models.generateContent({
+        model: DEFAULT_MODEL,
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        config: {
+          systemInstruction,
+          temperature: 0.4,
+          responseMimeType: "application/json",
+        }
+      });
 
-    return NextResponse.json({
-      action,
-      ...(action === 'counter' && { counterPrice }),
-      reasoning: aiData.reasoning,
-      mandiComparison: aiData.mandiComparison,
-      farmerBenefit: aiData.farmerBenefit
-    });
+      const cleanText = (response.text || "").replace(/```json\n|\n```|```/g, "").trim();
+      const aiDecision = JSON.parse(cleanText);
+
+      // Safety guardrails on AI output
+      if (aiDecision.action === "accept" && buyerOfferPerKg < effectiveFloor) {
+        aiDecision.action = "reject";
+        aiDecision.reasoning = `Sorry, ₹${buyerOfferPerKg}/kg is below the minimum protected price of ₹${effectiveFloor}/kg.`;
+        aiDecision.counterPrice = null;
+      }
+
+      if (aiDecision.action === "counter") {
+        // Ensure counter price is valid
+        let cp = aiDecision.counterPrice || Math.round((askingPricePerKg + buyerOfferPerKg) / 2);
+        cp = Math.max(cp, effectiveFloor); // Never below floor
+        cp = Math.min(cp, askingPricePerKg); // Never above asking
+        aiDecision.counterPrice = cp;
+      }
+
+      return NextResponse.json({
+        action: aiDecision.action,
+        counterPrice: aiDecision.counterPrice || null,
+        reasoning: aiDecision.reasoning || "Offer processed.",
+        mandiComparison: aiDecision.mandiComparison || "",
+        farmerBenefit: aiDecision.farmerBenefit || "",
+      });
+
+    } catch (aiError) {
+      console.warn("AI negotiation failed, using rule-based fallback:", aiError);
+
+      // Rule-based fallback only if AI is unavailable
+      const offerRatio = buyerOfferPerKg / askingPricePerKg;
+      let action: "accept" | "counter" | "reject" = "counter";
+      let counterPrice = askingPricePerKg;
+      let reasoning = "";
+
+      if (buyerOfferPerKg >= askingPricePerKg * 0.90) {
+        action = "accept";
+        reasoning = `Your offer of ₹${buyerOfferPerKg}/kg is fair. Deal accepted! This ${organicCertified ? 'organic ' : ''}${cropType} will be reserved for you.`;
+      } else if (buyerOfferPerKg < effectiveFloor) {
+        action = "reject";
+        reasoning = `₹${buyerOfferPerKg}/kg is below the minimum protected price of ₹${effectiveFloor}/kg. The mandi rate is ₹${mandiPricePerKg}/kg — we cannot go below market floor.`;
+      } else {
+        // Progressive concession based on round
+        const concessionRate = Math.min(0.5, 0.2 + (round * 0.05));
+        counterPrice = Math.round(askingPricePerKg - (askingPricePerKg - buyerOfferPerKg) * concessionRate);
+        counterPrice = Math.max(counterPrice, effectiveFloor);
+        action = "counter";
+        reasoning = `I appreciate your offer of ₹${buyerOfferPerKg}/kg. How about ₹${counterPrice}/kg? This is Grade ${qualityGrade || 'A'} ${cropType}, and the current mandi rate is ₹${mandiPricePerKg}/kg.`;
+      }
+
+      return NextResponse.json({
+        action,
+        counterPrice: action === "counter" ? counterPrice : null,
+        reasoning,
+        mandiComparison: `Mandi rate: ₹${mandiPricePerKg || 'N/A'}/kg`,
+        farmerBenefit: action === "accept" ? "Fair trade price secured" : "Farmer's minimum price protected",
+      });
+    }
 
   } catch (error) {
     console.error("Negotiation API Error:", error);

@@ -46,16 +46,26 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    if (!body.listingId || !body.farmerId || !body.buyerId || !body.totalAmount) {
+    if (!body.listingId || !body.farmerId || !body.buyerId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const platformFee = body.totalAmount * 0.02; // 2% commission
-    const farmerPayout = body.totalAmount - platformFee;
-    const middlemanSavings = body.totalAmount * 0.40; // Estimated 40% of totalAmount
+    // Compute totalAmount if not provided directly
+    const totalAmount = body.totalAmount || (body.quantityKg && body.agreedPricePerKg 
+      ? body.quantityKg * body.agreedPricePerKg 
+      : 0);
+
+    if (!totalAmount) {
+      return NextResponse.json({ error: 'Cannot compute totalAmount. Provide totalAmount or quantityKg + agreedPricePerKg.' }, { status: 400 });
+    }
+
+    const platformFee = 0; // Zero platform fee — free for farmers and buyers
+    const farmerPayout = totalAmount;
+    const middlemanSavings = totalAmount * 0.40; // Estimated 40% savings vs traditional supply chain
 
     const newOrder = {
       ...body,
+      totalAmount,
       platformFee,
       farmerPayout,
       middlemanSavings,

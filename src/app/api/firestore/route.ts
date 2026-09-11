@@ -31,7 +31,21 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { type, data } = body;
 
-    if (type === "cargo") {
+    if (type === "listing") {
+      if (data.id) {
+        await firestore.collection("listings").doc(data.id).set(data, { merge: true });
+      } else {
+        await firestore.collection("listings").add(data);
+      }
+    } else if (type === "order") {
+      if (data.id) {
+        await firestore.collection("orders").doc(data.id).set(data, { merge: true });
+      } else {
+        await firestore.collection("orders").add(data);
+      }
+    } else if (type === "delete_listing") {
+      await firestore.collection("listings").doc(data.id).delete();
+    } else if (type === "cargo") {
       await firestore.collection("cargos").doc(data.id).set(data, { merge: true });
     } else if (type === "bid") {
       await firestore.collection("bids").doc(data.id).set(data, { merge: true });

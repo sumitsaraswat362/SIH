@@ -78,20 +78,25 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 // --- OVERVIEW SECTION ---
 function OverviewSection({ onList, orders, listings }: { onList: () => void; orders: Order[]; listings: ProduceListing[] }) {
-  const totalEarnings = orders.filter(o => o.status === "delivered" || o.status === "in_transit").reduce((sum, o) => sum + o.farmerPayout, 0) || 45200;
-  const activeListings = listings.filter(l => l.status === "listed").length || 3;
-  const middlemanSavings = orders.reduce((sum, o) => sum + (o.middlemanSavings || 0), 0) || 8400;
-  const mandiPremium = orders.length ? (orders.reduce((sum, o) => sum + (o.mandiPriceComparison || 0), 0) / orders.length) : 18;
+  const totalEarnings = orders.filter(o => o.status === "delivered" || o.status === "in_transit").reduce((sum, o) => sum + (o.farmerPayout || 0), 0);
+  const activeListingCount = listings.filter(l => l.status === "listed").length;
+  const middlemanSavings = orders.reduce((sum, o) => sum + (o.middlemanSavings || 0), 0);
+  const mandiPremium = orders.length ? (orders.reduce((sum, o) => sum + (o.mandiPriceComparison || 0), 0) / orders.length) : 0;
 
-  const chartData = [
-    { name: "Mon", earnings: 4000 },
-    { name: "Tue", earnings: 3000 },
-    { name: "Wed", earnings: 5500 },
-    { name: "Thu", earnings: 4500 },
-    { name: "Fri", earnings: 7000 },
-    { name: "Sat", earnings: 8500 },
-    { name: "Sun", earnings: totalEarnings > 30000 ? 12700 : totalEarnings },
-  ];
+  // Build chart from actual order data grouped by day
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const earningsByDay: Record<string, number> = {};
+  dayNames.forEach(d => earningsByDay[d] = 0);
+  orders.forEach(o => {
+    if (o.createdAt) {
+      const day = dayNames[new Date(o.createdAt).getDay()];
+      earningsByDay[day] += (o.farmerPayout || 0);
+    }
+  });
+  const chartData = dayNames.slice(1).concat(dayNames.slice(0, 1)).map(day => ({
+    name: day,
+    earnings: earningsByDay[day],
+  }));
 
   return (
     <div className="space-y-6">
@@ -100,7 +105,7 @@ function OverviewSection({ onList, orders, listings }: { onList: () => void; ord
           { label: "Total Earnings", value: formatCurrency(totalEarnings), icon: Wallet, color: "text-[var(--tint-blue)]", bg: "bg-blue-500/10" },
           { label: "Avg. Mandi Premium", value: `+${mandiPremium.toFixed(1)}%`, icon: TrendingUp, color: "text-[var(--tint-green)]", bg: "bg-green-500/10" },
           { label: "Middleman Savings", value: formatCurrency(middlemanSavings), icon: IndianRupee, color: "text-[var(--tint-orange)]", bg: "bg-orange-500/10" },
-          { label: "Active Listings", value: activeListings, icon: List, color: "text-[var(--tint-purple)]", bg: "bg-purple-500/10" },
+          { label: "Active Listings", value: activeListingCount, icon: List, color: "text-[var(--tint-purple)]", bg: "bg-purple-500/10" },
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -268,7 +273,8 @@ function ListingModal({ onClose }: { onClose: () => void }) {
     };
 
     try {
-      await fetch('/api/listings', { method: 'POST', body: JSON.stringify(newListing) }).catch(() => {});
+      const res = await fetch('/api/listings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newListing) }).catch(() => null);
+      if (res && !res.ok) console.error('Failed to create listing in Firestore');
       dispatch({ type: "ADD_LISTING", listing: newListing });
       setShowToast(true);
       setTimeout(() => {
@@ -539,12 +545,28 @@ function ListingsSection({ listings }: { listings: ProduceListing[] }) {
 }
 
 // --- MY ORDERS SECTION ---
-function OrdersSection({ orders }: { orders: Order[] }) {
+function OrdersSection({ orders, dispatch }: { orders: Order[]; dispatch: React.Dispatch<any> }) {
+  const handleOrderAction = async (orderId: string, status: string) => {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, status })
+      });
+      if (res.ok) {
+        dispatch({ type: 'UPDATE_ORDER_STATUS', orderId, status });
+      }
+    } catch (e) {
+      console.error('Failed to update order:', e);
+    }
+  };
+
   if (!orders.length) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-[var(--text-tertiary)]">
         <Truck className="w-16 h-16 mb-4 opacity-50" />
         <h3 className="text-xl font-medium">No orders yet</h3>
+        <p className="text-sm mt-2">Orders from buyers will appear here</p>
       </div>
     );
   }
@@ -598,10 +620,16 @@ function OrdersSection({ orders }: { orders: Order[] }) {
 
             {order.status === 'pending' && (
               <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
-                <button className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-[var(--tint-green)] text-white font-semibold hover:bg-green-600 transition-colors shadow-lg">
+                <button 
+                  onClick={() => handleOrderAction(order.id, 'confirmed')}
+                  className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-[var(--tint-green)] text-white font-semibold hover:bg-green-600 transition-colors shadow-lg"
+                >
                   Accept
                 </button>
-                <button className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-red-500/10 text-red-500 font-semibold hover:bg-red-500/20 transition-colors">
+                <button 
+                  onClick={() => handleOrderAction(order.id, 'cancelled')}
+                  className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-red-500/10 text-red-500 font-semibold hover:bg-red-500/20 transition-colors"
+                >
                   Reject
                 </button>
               </div>
@@ -639,14 +667,42 @@ function OrdersSection({ orders }: { orders: Order[] }) {
 
 // --- DEMAND FORECAST SECTION ---
 function ForecastsSection() {
+  const [forecasts, setForecasts] = useState(DEMO_FORECASTS);
+  const [isAI, setIsAI] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const crops = ['onions', 'tomatoes', 'wheat', 'potatoes', 'grapes'];
+    Promise.all(crops.map(crop =>
+      fetch(`/api/demand-forecast?crop=${crop}&region=Maharashtra`)
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null)
+    )).then(results => {
+      const valid = results.filter(r => r && r.forecast).map(r => r.forecast);
+      if (valid.length > 0) {
+        setForecasts(valid);
+        setIsAI(true);
+      }
+    }).finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">AI Demand Forecasts</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">AI Demand Forecasts</h2>
+          {loading ? (
+            <span className="text-xs bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded-lg font-bold animate-pulse">Analyzing...</span>
+          ) : isAI ? (
+            <span className="text-xs bg-purple-500/10 text-purple-600 px-2 py-1 rounded-lg font-bold">🤖 AI Powered</span>
+          ) : (
+            <span className="text-xs bg-[var(--fill-secondary)] text-[var(--text-tertiary)] px-2 py-1 rounded-lg font-bold">📊 Historical</span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {DEMO_FORECASTS.map((forecast, i) => (
+        {forecasts.map((forecast, i) => (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -702,14 +758,39 @@ function ForecastsSection() {
 // --- MANDI PRICES SECTION ---
 function MandiPricesSection() {
   const [filterState, setFilterState] = useState("");
+  const [prices, setPrices] = useState(DEMO_MANDI_PRICES);
+  const [isLive, setIsLive] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/mandi-prices')
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && data.data.length > 0) {
+          setPrices(data.data);
+          setIsLive(data.source === 'gov');
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
   
-  const filteredPrices = DEMO_MANDI_PRICES.filter(p => !filterState || p.state === filterState);
-  const states = Array.from(new Set(DEMO_MANDI_PRICES.map(p => p.state)));
+  const filteredPrices = prices.filter(p => !filterState || p.state === filterState);
+  const states = Array.from(new Set(prices.map(p => p.state)));
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold">Real-time Mandi Prices</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">Mandi Prices</h2>
+          {loading ? (
+            <span className="text-xs bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded-lg font-bold animate-pulse">Loading...</span>
+          ) : isLive ? (
+            <span className="text-xs bg-green-500/10 text-green-600 px-2 py-1 rounded-lg font-bold">🟢 Live from data.gov.in</span>
+          ) : (
+            <span className="text-xs bg-[var(--fill-secondary)] text-[var(--text-tertiary)] px-2 py-1 rounded-lg font-bold">📊 Demo Data</span>
+          )}
+        </div>
         <select 
           value={filterState} 
           onChange={(e) => setFilterState(e.target.value)}
@@ -961,7 +1042,7 @@ export default function FarmerDashboard() {
             >
               {activeTab === "overview" && <OverviewSection onList={() => setShowListingModal(true)} orders={myOrders} listings={myListings} />}
               {activeTab === "listings" && <ListingsSection listings={myListings} />}
-              {activeTab === "orders" && <OrdersSection orders={myOrders} />}
+              {activeTab === "orders" && <OrdersSection orders={myOrders} dispatch={dispatch} />}
               {activeTab === "forecasts" && <ForecastsSection />}
               {activeTab === "mandi" && <MandiPricesSection />}
               {activeTab === "schemes" && <SchemesSection />}
