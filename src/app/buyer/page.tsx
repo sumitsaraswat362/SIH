@@ -3,14 +3,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAppState } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
-import { ProduceListing, CartItem } from "@/lib/types";
+import { ProduceListing, CartItem, Order } from "@/lib/types";
 import { DEMO_LISTINGS } from "@/data/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, MapPin, Leaf, Clock, ShoppingCart, 
   TrendingDown, CheckCircle2, ChevronDown, Filter, 
   Sparkles, Plus, Minus, Handshake, CreditCard,
-  MessageSquare, X, ArrowRight, LogOut
+  MessageSquare, X, ArrowRight, LogOut, ClipboardList, Package, Truck
 } from "lucide-react";
 
 const CATEGORIES = ["All", "Vegetables", "Fruits", "Grains", "Pulses", "Spices", "Dairy", "Organic"];
@@ -29,6 +29,7 @@ export default function BuyerMarketplace() {
   // Use state.listings if available, otherwise fallback to DEMO_LISTINGS
   const activeListings = state.listings.length > 0 ? state.listings : DEMO_LISTINGS;
 
+  const [viewMode, setViewMode] = useState<"marketplace" | "orders">("marketplace");
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [smartQuery, setSmartQuery] = useState("");
@@ -143,7 +144,23 @@ export default function BuyerMarketplace() {
             <p className="text-xs md:text-sm font-medium text-[var(--text-secondary)]">Fresh from Farm, Direct to You</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <button 
+              onClick={() => setViewMode(viewMode === "orders" ? "marketplace" : "orders")}
+              className={`relative h-11 px-3 rounded-xl border flex items-center justify-center gap-1.5 transition-colors backdrop-blur-md text-sm font-bold ${
+                viewMode === "orders" 
+                  ? "bg-[#007AFF]/10 border-[#007AFF]/30 text-[#007AFF]"
+                  : "bg-[var(--fill-secondary)] border-[var(--separator)] text-[var(--text-primary)] hover:bg-[var(--fill-tertiary)]"
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span className="hidden md:inline">{viewMode === "orders" ? "Back to Shop" : "My Orders"}</span>
+              {state.orders.filter(o => o.buyerId === (user?.id || "")).length > 0 && viewMode !== "orders" && (
+                <span className="absolute -top-1 -right-1 badge-count shadow-sm bg-[#007AFF]">
+                  {state.orders.filter(o => o.buyerId === (user?.id || "")).length}
+                </span>
+              )}
+            </button>
             <button 
               onClick={() => setIsCartOpen(true)}
               className="relative w-11 h-11 rounded-xl bg-[var(--fill-secondary)] border border-[var(--separator)] flex items-center justify-center hover:bg-[var(--fill-tertiary)] transition-colors backdrop-blur-md"
@@ -169,6 +186,9 @@ export default function BuyerMarketplace() {
       </header>
 
       {/* ===== MAIN CONTENT ===== */}
+      {viewMode === "orders" ? (
+        <BuyerOrdersView orders={state.orders.filter(o => o.buyerId === (user?.id || ""))} user={user} />
+      ) : (
       <main className="max-w-7xl mx-auto px-4 md:px-6 pt-6 relative z-10">
         {/* Banner */}
         <div className="glass liquid-glass rounded-2xl p-4 md:p-6 mb-6 flex flex-col md:flex-row items-center justify-between border border-[var(--separator)] shadow-md overflow-hidden relative">
@@ -289,6 +309,7 @@ export default function BuyerMarketplace() {
           </div>
         )}
       </main>
+      )}
 
       {/* Cart Drawer */}
       <AnimatePresence>
@@ -927,5 +948,131 @@ function NegotiationModal({ listing, qty, onClose, onAddToCart }: { listing: Pro
         </div>
       </motion.div>
     </div>
+  );
+}
+
+// ===== BUYER ORDERS VIEW =====
+function BuyerOrdersView({ orders, user }: { orders: Order[]; user: any }) {
+  const statusSteps = ['pending', 'confirmed', 'in_transit', 'delivered'];
+  const statusLabels: Record<string, string> = {
+    pending: 'Order Placed',
+    confirmed: 'Confirmed',
+    in_transit: 'In Transit',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+  };
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+      case 'confirmed': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+      case 'in_transit': return 'text-purple-500 bg-purple-500/10 border-purple-500/20';
+      case 'delivered': return 'text-green-500 bg-green-500/10 border-green-500/20';
+      case 'cancelled': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+    }
+  };
+  const sorted = [...orders].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  return (
+    <main className="max-w-4xl mx-auto px-4 md:px-6 pt-6 pb-20 relative z-10">
+      <div className="mb-8">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)]">My Orders</h2>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">{sorted.length} order{sorted.length !== 1 ? 's' : ''}</p>
+      </div>
+
+      {sorted.length === 0 ? (
+        <div className="text-center py-20">
+          <Package className="w-20 h-20 mx-auto mb-6 text-[var(--text-tertiary)] opacity-40" />
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No orders yet</h3>
+          <p className="text-[var(--text-tertiary)]">Browse the marketplace and place your first order!</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {sorted.map((order, i) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-[var(--fill-secondary)] backdrop-blur-xl border border-[var(--separator)] rounded-[24px] p-6 shadow-lg"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-5">
+                <div>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] capitalize">
+                    {order.cropType} {order.variety ? `(${order.variety})` : ''}
+                  </h3>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                    Order #{order.id?.slice(-8)} · {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                  </p>
+                </div>
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(order.status as string)}`}>
+                  {statusLabels[order.status as string] || (order.status as string)}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 bg-[var(--bg-primary)] p-4 rounded-xl border border-[var(--separator)]">
+                <div>
+                  <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-bold mb-1">Quantity</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{order.quantityKg} kg</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-bold mb-1">Price</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">₹{order.agreedPricePerKg}/kg</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-bold mb-1">Total</p>
+                  <p className="text-sm font-bold text-[var(--tint-green)]">₹{order.totalAmount || (order.quantityKg * order.agreedPricePerKg)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-bold mb-1">Farmer</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{order.farmerName || 'Farmer'}</p>
+                </div>
+              </div>
+
+              {order.status !== 'cancelled' && (
+                <div className="flex items-center gap-0 w-full">
+                  {statusSteps.map((step, idx) => {
+                    const currentIdx = statusSteps.indexOf(order.status as string);
+                    const isCompleted = currentIdx >= idx;
+                    const isCurrent = currentIdx === idx;
+                    return (
+                      <React.Fragment key={step}>
+                        <div className="flex flex-col items-center" style={{ minWidth: 'fit-content' }}>
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
+                            isCompleted ? 'bg-[var(--tint-green)] border-[var(--tint-green)] text-white' : 'bg-[var(--fill-secondary)] border-[var(--separator)]'
+                          } ${isCurrent ? 'ring-4 ring-green-500/20' : ''}`}>
+                            {isCompleted && <CheckCircle2 className="w-4 h-4" />}
+                          </div>
+                          <span className={`text-[10px] mt-1.5 font-medium text-center leading-tight ${isCompleted ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
+                            {statusLabels[step]}
+                          </span>
+                        </div>
+                        {idx < statusSteps.length - 1 && (
+                          <div className={`flex-1 h-0.5 mx-1 mt-[-16px] rounded-full ${currentIdx > idx ? 'bg-[var(--tint-green)]' : 'bg-[var(--separator)]'}`} />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
+
+              {order.status === 'cancelled' && (
+                <div className="flex items-center gap-2 text-red-500 bg-red-500/5 p-3 rounded-xl">
+                  <X className="w-4 h-4" />
+                  <span className="text-sm font-medium">This order was cancelled</span>
+                </div>
+              )}
+
+              {order.deliveryAddress && (
+                <div className="mt-4 pt-4 border-t border-[var(--separator)] flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span>Delivery: {order.deliveryAddress}</span>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

@@ -34,21 +34,23 @@ export async function GET(req: Request) {
         if (data && data.records && data.records.length > 0) {
           // Transform gov data (₹/Quintal) to our format (₹/kg)
           const transformed = data.records.map((record: any) => {
-            const minPrice = parseFloat(record.min_price) / 100; // 1 Quintal = 100 kg
-            const maxPrice = parseFloat(record.max_price) / 100;
-            const modalPrice = parseFloat(record.modal_price) / 100;
+            const minPriceRaw = parseFloat(record.min_price) || 0;
+            const maxPriceRaw = parseFloat(record.max_price) || 0;
+            const modalPriceRaw = parseFloat(record.modal_price) || 0;
             
             return {
               id: `${record.state}-${record.market}-${record.commodity}-${record.arrival_date}`,
               state: record.state,
               district: record.district,
               market: record.market,
-              commodity: record.commodity.toLowerCase(),
+              commodity: record.commodity,
               variety: record.variety,
-              minPriceKg: Math.round(minPrice),
-              maxPriceKg: Math.round(maxPrice),
-              modalPriceKg: Math.round(modalPrice),
-              date: record.arrival_date
+              minPrice: Math.round(minPriceRaw),
+              maxPrice: Math.round(maxPriceRaw),
+              modalPrice: Math.round(modalPriceRaw),
+              pricePerKg: Math.round(modalPriceRaw / 100),
+              arrivalDate: record.arrival_date,
+              source: 'gov',
             };
           });
           

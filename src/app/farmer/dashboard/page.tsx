@@ -35,7 +35,8 @@ import {
   Menu,
   Leaf,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from "lucide-react";
 import {
   AreaChart,
@@ -480,7 +481,21 @@ function ListingModal({ onClose }: { onClose: () => void }) {
 }
 
 // --- MY LISTINGS SECTION ---
-function ListingsSection({ listings }: { listings: ProduceListing[] }) {
+function ListingsSection({ listings, dispatch }: { listings: ProduceListing[]; dispatch: React.Dispatch<any> }) {
+  const handleDelete = async (listingId: string) => {
+    if (!confirm('Are you sure you want to delete this listing?')) return;
+    try {
+      await fetch('/api/firestore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'delete_listing', data: { id: listingId } })
+      });
+      dispatch({ type: 'REMOVE_LISTING', listingId });
+    } catch (e) {
+      console.error('Failed to delete listing:', e);
+    }
+  };
+
   if (!listings.length) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-[var(--text-tertiary)]">
@@ -520,6 +535,13 @@ function ListingsSection({ listings }: { listings: ProduceListing[] }) {
                   {listing.status.toUpperCase()}
                 </span>
               </div>
+              {listing.availableQuantityKg !== undefined && listing.availableQuantityKg < listing.quantityKg && (
+                <div className="absolute bottom-4 left-4">
+                  <span className="px-2 py-1 rounded-lg text-xs font-bold bg-orange-500/90 text-white shadow-md backdrop-blur-md">
+                    {listing.availableQuantityKg}kg left of {listing.quantityKg}kg
+                  </span>
+                </div>
+              )}
             </div>
             <div className="p-5">
               <div className="flex justify-between items-start mb-2">
@@ -529,7 +551,7 @@ function ListingsSection({ listings }: { listings: ProduceListing[] }) {
                 <p className="text-lg font-bold text-[var(--tint-green)]">₹{listing.askingPricePerKg}/kg</p>
               </div>
               <div className="flex gap-4 text-sm text-[var(--text-secondary)] mb-6">
-                <span className="flex items-center gap-1"><Package className="w-4 h-4"/> {listing.quantityKg} kg</span>
+                <span className="flex items-center gap-1"><Package className="w-4 h-4"/> {listing.availableQuantityKg ?? listing.quantityKg} kg</span>
                 <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4"/> Grade {listing.qualityGrade}</span>
               </div>
               
@@ -538,11 +560,13 @@ function ListingsSection({ listings }: { listings: ProduceListing[] }) {
                   <span className="flex items-center gap-1"><Search className="w-3.5 h-3.5"/> {listing.viewCount} views</span>
                   <span className="flex items-center gap-1 text-[var(--tint-blue)]"><Wallet className="w-3.5 h-3.5"/> {listing.totalBuyerInterests} interests</span>
                 </div>
-                <div className="flex gap-2">
-                  <button className="p-2 bg-[var(--fill-secondary)] hover:bg-[var(--fill-primary)] rounded-xl transition-colors">
-                    <Settings className="w-4 h-4 text-[var(--text-primary)]" />
-                  </button>
-                </div>
+                <button 
+                  onClick={() => handleDelete(listing.id)}
+                  className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-xl transition-colors text-red-500"
+                  title="Delete Listing"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </motion.div>
@@ -554,7 +578,7 @@ function ListingsSection({ listings }: { listings: ProduceListing[] }) {
 
 // --- MY ORDERS SECTION ---
 function OrdersSection({ orders, dispatch }: { orders: Order[]; dispatch: React.Dispatch<any> }) {
-  const handleOrderAction = async (orderId: string, status: string) => {
+  const handleOrderAction = async (orderId: string, status: string, order?: Order) => {
     try {
       const res = await fetch('/api/orders', {
         method: 'PATCH',
@@ -563,6 +587,26 @@ function OrdersSection({ orders, dispatch }: { orders: Order[]; dispatch: React.
       });
       if (res.ok) {
         dispatch({ type: 'UPDATE_ORDER_STATUS', orderId, status });
+        
+        // Deduct inventory when order is confirmed
+        if (status === 'confirmed' && order?.listingId && order?.quantityKg) {
+          dispatch({ 
+            type: 'UPDATE_LISTING', 
+            listingId: order.listingId, 
+            updates: { 
+              availableQuantityKg: -order.quantityKg // will be computed in reducer
+            } 
+          });
+          // Also update in Firestore via listings API
+          fetch('/api/firestore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              type: 'listing', 
+              data: { id: order.listingId, _decrementQty: order.quantityKg } 
+            })
+          }).catch(console.error);
+        }
       }
     } catch (e) {
       console.error('Failed to update order:', e);
@@ -629,7 +673,7 @@ function OrdersSection({ orders, dispatch }: { orders: Order[]; dispatch: React.
             {order.status === 'pending' && (
               <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
                 <button 
-                  onClick={() => handleOrderAction(order.id, 'confirmed')}
+                  onClick={() => handleOrderAction(order.id, 'confirmed', order)}
                   className="flex-1 md:flex-none px-6 py-3 rounded-2xl bg-[var(--tint-green)] text-white font-semibold hover:bg-green-600 transition-colors shadow-lg"
                 >
                   Accept
@@ -1049,7 +1093,7 @@ export default function FarmerDashboard() {
               className="h-full"
             >
               {activeTab === "overview" && <OverviewSection onList={() => setShowListingModal(true)} orders={myOrders} listings={myListings} />}
-              {activeTab === "listings" && <ListingsSection listings={myListings} />}
+              {activeTab === "listings" && <ListingsSection listings={myListings} dispatch={dispatch} />}
               {activeTab === "orders" && <OrdersSection orders={myOrders} dispatch={dispatch} />}
               {activeTab === "forecasts" && <ForecastsSection region={user?.state} />}
               {activeTab === "mandi" && <MandiPricesSection />}

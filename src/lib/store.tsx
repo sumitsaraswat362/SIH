@@ -78,9 +78,16 @@ function appReducer(state: AppState, action: Action): AppState {
     case "UPDATE_LISTING":
       return {
         ...state,
-        listings: state.listings.map((l) =>
-          l.id === action.listingId ? { ...l, ...action.updates } : l
-        ),
+        listings: state.listings.map((l) => {
+          if (l.id !== action.listingId) return l;
+          const updates = { ...action.updates };
+          // Handle inventory deduction: negative availableQuantityKg means decrement
+          if (updates.availableQuantityKg !== undefined && updates.availableQuantityKg < 0) {
+            const current = l.availableQuantityKg ?? l.quantityKg;
+            updates.availableQuantityKg = Math.max(0, current + updates.availableQuantityKg);
+          }
+          return { ...l, ...updates };
+        }),
       };
 
     case "REMOVE_LISTING":
