@@ -149,8 +149,8 @@ Annapurna utilizes a constellation of 5 specialized AI Agents working in tandem:
 
 ## 👥 Team
 
-**Team Annapurna** — Passionate developers building for India.
-Built with ❤️ for SIH 2024.
+**Team Acrobytes** — Passionate developers building for India.
+Built with ❤️ for SIH 2026.
 
 ---
 
